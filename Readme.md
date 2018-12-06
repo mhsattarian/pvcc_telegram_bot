@@ -23,6 +23,20 @@ A Telegram Bot to collect Persian commands listed bellow from the user by asking
 `راست` - 
 `کی ساخت؟`
 
+## Usage
+
+Create a `.env` file in the root of the project and add your *telegram bot token* like this line:
+
+```shell
+TG_TOKEN=<your-tg-bot-token>
+```
+
+then run the code using:
+
+```shell
+node index.html
+```
+
 ## Bot
 
 [`@pvcc_bot`](https://telegram.me/pvcc_bot) on Telegram
