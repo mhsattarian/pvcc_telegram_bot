@@ -15,6 +15,7 @@
   "author": "Mohammad H. Sattarian (mh_sattarian@outlook.com)",
   "license": "MIT",
   "dependencies": {
+    "dotenv": "^6.2.0",
     "telegraf": "^3.25.5"
   }
 }
