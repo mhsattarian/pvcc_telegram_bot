@@ -27,4 +27,4 @@ A Telegram Bot to collect Persian commands listed bellow from the user by asking
 
 ## Bot
 
-[`@pvcc_bot`]("telegram.me/pvcc_bot") on Telegram
+[`@pvcc_bot`]("https://telegram.me/pvcc_bot") on Telegram
