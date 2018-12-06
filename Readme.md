@@ -4,6 +4,7 @@ A Telegram Bot to collect Persian commands listed bellow from the user by asking
 
 ## commands
 
+<div style="direction:rtl">
 `روشن` - 
 `خاموش` - 
 `دوربین` - 
@@ -21,7 +22,8 @@ A Telegram Bot to collect Persian commands listed bellow from the user by asking
 `پایین` - 
 `چپ` - 
 `راست` - 
-`کی ساخت?`
+`کی ساخت؟`
+</div>
 
 ## Bot
 
