@@ -9,7 +9,7 @@ const Telegraf = require('telegraf'), // Telegram API wrapper
   https = require('https'),
   fs = require('fs');
 
-  console.log(process.env.TG_TOKEN)
+
 
 const bot = new Telegraf(process.env.TG_TOKEN); // connects to Bot using the Token
 const commands = [ // Persian Commands to Be spoken!
