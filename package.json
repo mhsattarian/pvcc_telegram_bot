@@ -1,0 +1,20 @@
+{
+  "name": "pvcc-node",
+  "version": "0.0.0",
+  "description": "Persian voice command collector telegram bot written in Nodejs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "telegram",
+    "bot",
+    "persian",
+    "nodejs"
+  ],
+  "author": "Mohammad H. Sattarian (mh_sattarian@outlook.com)",
+  "license": "MIT",
+  "dependencies": {
+    "telegraf": "^3.25.5"
+  }
+}
