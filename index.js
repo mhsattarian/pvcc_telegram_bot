@@ -5,7 +5,11 @@ const Telegraf = require('telegraf'), // Telegram API wrapper
   Extra = require('telegraf/extra'),
   Markup = require('telegraf/markup'),
   session = require('telegraf/session'),
-  http = require('http'),
+  Composer = require('telegraf/composer'),
+  Stage = require('telegraf/stage'),
+  WizardScene = require('telegraf/scenes/wizard');
+
+const http = require('http'),
   https = require('https'),
   fs = require('fs');
 
@@ -47,14 +51,17 @@ bot.telegram.deleteWebhook(); // for making sure no webhook is running
 bot.startPolling(); // Start listening for updates from the bot
 
 /** On START */
-bot.start((ctx) => ctx.reply(`
-با سلام ${ctx.from.username}.
-ممنونیم که وقت خودتون رو در اختیار ما گذاشته و به جمع‌آوری دیتاستی از دستورات فارسی کمک می‌کنید 🙏. در ادامه پس از انتخاب گزینه شروع، در هر مرتبه یک دستور به شما نمایش داده می‌شود و از شما خواسته می‌شود که آن را سه بار ضبط کرده و ارسال کنید.
-برای شروع گزینه زیر را نتخاب کنید:
-`,
+bot.start((ctx) => {
+  ctx.reply(`
+    با سلام ${ctx.from.username}.
+    ممنونیم که وقت خودتون رو در اختیار ما گذاشته و به جمع‌آوری دیتاستی از دستورات فارسی کمک می‌کنید 🙏. در ادامه پس از انتخاب گزینه شروع، در هر مرتبه یک دستور به شما نمایش داده می‌شود و از شما خواسته می‌شود که آن را سه بار ضبط کرده و ارسال کنید.
+    برای شروع گزینه زیر را نتخاب کنید:
+    `,
     Markup.inlineKeyboard([
       Markup.callbackButton('شروع', 'start_confirmed')
-    ]).extra()));
+    ]).extra());
+  }
+);
 
 bot.action('start_confirmed', (ctx, next) => {
   return showMessage(ctx);
@@ -66,11 +73,11 @@ bot.action('next_command', (ctx, next) => {
 
 
 function showMessage(ctx) {
-
-  ctx.reply(commands[session.commandCounter],
-    Markup.inlineKeyboard([
-      Markup.callbackButton('more', 'next_command')
-    ]).extra());
+  ctx.replyWithHTML(`
+    لطفا دستور «<b>${commands[session.commandCounter]}</b>» را تلفظ کنید:
+    `);
+  
+  return ctx.reply(`مرتبه ${session.commandStatuses[commands[session.commandCounter]].voiceCount}`)
 }
 
 function showNextMessage(ctx){
