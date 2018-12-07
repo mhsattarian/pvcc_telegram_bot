@@ -69,7 +69,7 @@ const sceneCleaner = () => async (ctx) => {
 }
 
 // Show a Keyboard of Commands and their voice count
-const replyKeyboard = () => Markup.keyboard(commands.map(
+const chooseCommandKeyboard = () => Markup.keyboard(commands.map(
   (item)=> `${item} (${session.commandStatuses[item].voiceCount} از 3)`))
   .oneTime().resize().extra()
 
@@ -80,26 +80,43 @@ var choosenCommand = '';
 const firstScene = new Scene('choose_command')
   .enter(async (ctx) => {
     const messages = []
-    messages.push(await ctx.reply('یکی از دستورات را انتخاب کنید:', replyKeyboard()))
+    messages.push(await ctx.reply('یکی از دستورات را انتخاب کنید:', chooseCommandKeyboard()))
     // ctx.scene.state.messages = messages
   })
-  .on('message', (ctx)=>{
-    text = ctx.message.text;
-    console.log(text)
+  .on('text', (ctx)=>{
+    text = ctx.message.text.split(' ')[0]; // Input text not in commands
     if (!commands.includes(text)) ctx.reply('لطفا یکی از دستورات لیست را انتخاب کنید.');
+    else choosenCommand = text;
+    if (session.commandStatuses[choosenCommand].voiceCount < 3) ctx.scene.enter('get_voices');
+    else ctx.reply('یکی دیگر از دستورات را انتخاب کنید:')
   })
-  // .on('voice', (ctx)=>ctx.reply("لطفا اول یک دستور را انتخاب کنید"))
-  .leave(sceneCleaner())
+  .on('voice', (ctx)=>ctx.reply("لطفا اول یک دستور را انتخاب کنید"))
+  .leave(async (ctx)=> {})
 
-const secondScene = new Scene('second')
-  .enter(async (ctx) => {
+const secondScene = new Scene('get_voices')
+  .enter((ctx) => {
     const messages = []
-    messages.push(await ctx.reply('Second scene, first message'))
-    messages.push(await ctx.reply('Second scene, second message'))
-    messages.push(await ctx.reply('Second scene, third message', replyKeyboard()))
-    ctx.scene.state.messages = messages
+    var voiceCount = ++session.commandStatuses[choosenCommand].voiceCount;
+    if (voiceCount > 3) {
+      --session.commandStatuses[choosenCommand].voiceCount;
+      ctx.scene.enter('choose_command')
+    }
+    else{
+      console.log(voiceCount)
+      ctx.reply(`
+      مرتبه ${voiceCount == 1 ? '1️⃣' : voiceCount == 2 ? '2️⃣' : '3️⃣'}
+      صدای خود را ضبط کرده و ارسال کنید:
+      `)
+    }
+    // ctx.scene.state.messages = messages
   })
-  .leave(sceneCleaner())
+  .on('voice', (ctx)=>{
+    ctx.reply("👌");
+    console.log(session.commandStatuses[choosenCommand].voiceCount);
+    ctx.scene.reenter();
+  })
+  .leave(async (ctx) => {
+  })
 
 
 
@@ -131,39 +148,38 @@ bot.action('start_confirmed', (ctx, next) => {
 
 
 
+// bot.action('next_command', (ctx, next) => {
+//   return showNextMessage(ctx);
+// });
 
-bot.action('next_command', (ctx, next) => {
-  return showNextMessage(ctx);
-});
 
-
-function showMessage(ctx) {
-  ctx.replyWithHTML(`
-    لطفا دستور «<b>${commands[session.commandCounter]}</b>» را تلفظ کنید:
-    `);
+// function showMessage(ctx) {
+//   ctx.replyWithHTML(`
+//     لطفا دستور «<b>${commands[session.commandCounter]}</b>» را تلفظ کنید:
+//     `);
   
-  return ctx.reply(`مرتبه ${session.commandStatuses[commands[session.commandCounter]].voiceCount}`)
-}
+//   return ctx.reply(`مرتبه ${session.commandStatuses[commands[session.commandCounter]].voiceCount}`)
+// }
 
-function showNextMessage(ctx){
-  session.commandCounter = session.commandCounter + 1;
-  showMessage(ctx)
-}
+// function showNextMessage(ctx){
+//   session.commandCounter = session.commandCounter + 1;
+//   showMessage(ctx)
+// }
 
-bot.on('voice', (ctx) => {
-  console.log(ctx.message.voice.file_id)
-  url = bot.telegram.getFileLink(ctx.message.voice.file_id).then(url=>{
-    console.log(url)
-    getFile(url);
-    ctx.reply(url)
-  })
-});
+// bot.on('voice', (ctx) => {
+//   console.log(ctx.message.voice.file_id)
+//   url = bot.telegram.getFileLink(ctx.message.voice.file_id).then(url=>{
+//     console.log(url)
+//     getFile(url);
+//     ctx.reply(url)
+//   })
+// });
 
 
-bot.command('caption', (ctx) => ctx.replyWithPhoto('https://picsum.photos/200/300/?random', {
-  caption: 'Caption *text*',
-  parse_mode: 'Markdown'
-}));
+// bot.command('caption', (ctx) => ctx.replyWithPhoto('https://picsum.photos/200/300/?random', {
+//   caption: 'Caption *text*',
+//   parse_mode: 'Markdown'
+// }));
 
 
 // bot.use((ctx) => {
@@ -172,16 +188,16 @@ bot.command('caption', (ctx) => ctx.replyWithPhoto('https://picsum.photos/200/30
 // });
 
 
-bot.on('text', (ctx)=>ctx.reply("wow222!"));
+// bot.on('text', (ctx)=>ctx.reply("wow222!"));
 
 
-function getFile(url){
-  console.log(url);
-  var file = fs.createWriteStream("file.oga");
-  var request = https.get(url, function(response) {
-    response.pipe(file);
-  });
-}
+// function getFile(url){
+//   console.log(url);
+//   var file = fs.createWriteStream("file.oga");
+//   var request = https.get(url, function(response) {
+//     response.pipe(file);
+//   });
+// }
 
 // bot.use(Telegraf.log())
 
