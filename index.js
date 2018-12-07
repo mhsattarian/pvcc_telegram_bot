@@ -1,5 +1,5 @@
 
-require('dotenv').config();
+require('dotenv').config(); // Reads the .env file and add each line in environment variables
 
 const Telegraf = require('telegraf'), // Telegram API wrapper
   Extra = require('telegraf/extra'),
@@ -7,16 +7,20 @@ const Telegraf = require('telegraf'), // Telegram API wrapper
   session = require('telegraf/session'),
   Composer = require('telegraf/composer'),
   Stage = require('telegraf/stage'),
-  WizardScene = require('telegraf/scenes/wizard');
+  WizardScene = require('telegraf/scenes/wizard'),
+  Scene = require('telegraf/scenes/base'),
+  { enter } = Stage;
 
 const http = require('http'),
   https = require('https'),
   fs = require('fs');
 
 
+// connects to Bot using the Token
+const bot = new Telegraf(process.env.TG_TOKEN);
 
-const bot = new Telegraf(process.env.TG_TOKEN); // connects to Bot using the Token
-const commands = [ // Persian Commands to Be spoken!
+// Persian Commands to Be spoken!
+const commands = [
   'روشن',
   'خاموش',
   'دوربین',
@@ -37,9 +41,12 @@ const commands = [ // Persian Commands to Be spoken!
   'کی ساختت؟'
 ];
 
-session.commandCounter = 0; // Number of the command to get its voice
-session.commandStatuses = {} // Status of each command (whether its spoken and how many times)
-for (var i=0; i<commands.length; i++) { // Creating the commandStatuses object using commands array
+// Number of the command to get its voice
+session.commandCounter = 0;
+// Status of each command (whether its spoken and how many times)
+session.commandStatuses = {}
+// Creating the commandStatuses object using commands array
+for (var i=0; i<commands.length; i++) { 
   session.commandStatuses[commands[i]] = {
     done: false,
     voiceCount : 0
@@ -50,7 +57,57 @@ for (var i=0; i<commands.length; i++) { // Creating the commandStatuses object u
 bot.telegram.deleteWebhook(); // for making sure no webhook is running
 bot.startPolling(); // Start listening for updates from the bot
 
-/** On START */
+
+const sceneCleaner = () => async (ctx) => {
+  ctx.scene.state.messages.forEach(({ message_id: id }) => {
+    try {
+      ctx.deleteMessage(id)
+    } catch (error) {
+      console.log(error)
+    }
+  })
+}
+
+// Show a Keyboard of Commands and their voice count
+const replyKeyboard = () => Markup.keyboard(commands.map(
+  (item)=> `${item} (${session.commandStatuses[item].voiceCount} از 3)`))
+  .oneTime().resize().extra()
+
+// Stores the command choosen to be pronounced (fill in first scene and uses in seconds)
+var choosenCommand = '';
+
+// The choose your command scene
+const firstScene = new Scene('choose_command')
+  .enter(async (ctx) => {
+    const messages = []
+    messages.push(await ctx.reply('یکی از دستورات را انتخاب کنید:', replyKeyboard()))
+    // ctx.scene.state.messages = messages
+  })
+  .on('message', (ctx)=>{
+    text = ctx.message.text;
+    console.log(text)
+    if (!commands.includes(text)) ctx.reply('لطفا یکی از دستورات لیست را انتخاب کنید.');
+  })
+  // .on('voice', (ctx)=>ctx.reply("لطفا اول یک دستور را انتخاب کنید"))
+  .leave(sceneCleaner())
+
+const secondScene = new Scene('second')
+  .enter(async (ctx) => {
+    const messages = []
+    messages.push(await ctx.reply('Second scene, first message'))
+    messages.push(await ctx.reply('Second scene, second message'))
+    messages.push(await ctx.reply('Second scene, third message', replyKeyboard()))
+    ctx.scene.state.messages = messages
+  })
+  .leave(sceneCleaner())
+
+
+
+const stage = new Stage([firstScene, secondScene], { ttl: 10 })
+bot.use(session())
+bot.use(stage.middleware())
+
+/** -------------------- on START --------------- **/
 bot.start((ctx) => {
   ctx.reply(`
     با سلام ${ctx.from.username}.
@@ -64,8 +121,16 @@ bot.start((ctx) => {
 );
 
 bot.action('start_confirmed', (ctx, next) => {
-  return showMessage(ctx);
+  ctx.scene.enter('choose_command')
 });
+
+
+
+
+
+
+
+
 
 bot.action('next_command', (ctx, next) => {
   return showNextMessage(ctx);
@@ -101,10 +166,13 @@ bot.command('caption', (ctx) => ctx.replyWithPhoto('https://picsum.photos/200/30
 }));
 
 
-bot.use((ctx) => {
-  console.log("Welcom!!!!")
-});
+// bot.use((ctx) => {
+//   cmd = ctx.message.text
+//   ctx.reply(`مرتبه ${++session.commandStatuses[cmd].voiceCount}`)
+// });
 
+
+bot.on('text', (ctx)=>ctx.reply("wow222!"));
 
 
 function getFile(url){
