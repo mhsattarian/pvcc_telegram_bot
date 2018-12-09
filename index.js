@@ -77,11 +77,6 @@ const firstScene = new Scene('choose_command')
     // ctx.scene.state.messages = messages
   })
   .on('text', async (ctx)=>{
-    // if (ctx.message.text.startsWith('/')) {
-    //   console.log("Done");
-    //   return ctx.reply("لطفا ابتدا دستور مورد نظر را انتخاب کنید")
-    // }
-
     // cuase command had become (روشن (0 از 3))
     command = ctx.message.text.split(' ')[0];
     
@@ -134,6 +129,12 @@ const secondScene = new Scene('get_voices')
   .on('voice', (ctx)=>{
     // Thank the user
     ctx.reply("👌");
+    
+    // Take voice file url to be download
+    url = bot.telegram.getFileLink(ctx.message.voice.file_id).then(url=>{
+      ctx.userSession.commandStatuses[ctx.session.choosenCommand].urls.push(url);
+    })
+    
     // ReEnter in current scene to ask for pronounciation again if needed
     ctx.scene.reenter();
   })
@@ -183,7 +184,8 @@ bot.start((ctx) => {
   commands.map(command=>{
     userSession.commandStatuses[command] = {
       done: false,
-      voiceCount : 0
+      voiceCount : 0,
+      urls : []
     }
   })
   // Save user's username , name
@@ -224,19 +226,3 @@ bot.hears('[لغو]', ctx => {
     Extra.markup(Markup.removeKeyboard()),
   );
 });
-
-
-// url = bot.telegram.getFileLink(ctx.message.voice.file_id).then(url=>{
-//       console.log(url)
-//       getFile(url);
-//       ctx.reply(url)
-//     })
-
-
-// function getFile(url){
-//   console.log(url);
-//   var file = fs.createWriteStream("file.oga");
-//   var request = https.get(url, function(response) {
-//     response.pipe(file);
-//   });
-// }
