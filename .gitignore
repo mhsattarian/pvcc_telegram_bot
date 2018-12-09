@@ -1,5 +1,8 @@
+# Directories
 node_modules/
 New folder/
+voices/
 
+# Files
 .env
 sessions.json
