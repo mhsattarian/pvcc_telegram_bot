@@ -162,7 +162,7 @@ bot.use((new LocalSession({ database: 'sessions.json',  property: 'userSession'}
 bot.use(session())
 
 // Define Bot stages (scenes)
-const stage = new Stage([firstScene, secondScene], { ttl: 10 })
+const stage = new Stage([firstScene, secondScene], { ttl: 100 })
 bot.use(stage.middleware())
 
 
