@@ -2,3 +2,4 @@ node_modules/
 New folder/
 
 .env
+sessions.json
