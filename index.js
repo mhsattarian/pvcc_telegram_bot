@@ -14,6 +14,7 @@ const Telegraf = require('telegraf'), // Telegram API wrapper
   Scene = require('telegraf/scenes/base'),
   LocalSession = require('telegraf-session-local'),
   shell = require('shelljs'),
+  { fork } = require('child_process'),
   { enter } = Stage;
 
 const http = require('http'),
@@ -114,6 +115,11 @@ const secondScene = new Scene('get_voices')
     var voiceCount = ++ctx.userSession.commandStatuses[ctx.session.choosenCommand].voiceCount;
     if (voiceCount > 3) {
       // Cause we added once on line above
+      const process = fork('./downloadVoices.js');
+      process.send({ userId: getSessionKey(ctx).replace(':', '-'), voiceId: commands.indexOf(ctx.session.choosenCommand)});
+      // process.on('message', (message) => {
+      //   log.info(`${message.downloadedFile} downloaded`);
+      // });
       --ctx.userSession.commandStatuses[ctx.session.choosenCommand].voiceCount;
       ctx.scene.enter('choose_command')
     }
@@ -151,11 +157,8 @@ const secondScene = new Scene('get_voices')
     fileAddr = `./voices/${userId}/${commands.indexOf(ctx.session.choosenCommand)}/urls.txt`;
     url = bot.telegram.getFileLink(ctx.message.voice.file_id).then(url=>{
       // ctx.userSession.commandStatuses[ctx.session.choosenCommand].urls.push(url);
-      console.log("Writing in file: ", fileAddr);
-      console.log(url);
-      fs.appendFile(fileAddr, '\n' + url, function (err) {
+      fs.appendFile(fileAddr, url + '\n', function (err) {
         if (err) throw err;
-        console.log("Write succesfully");
       }); 
     });
     
@@ -215,8 +218,6 @@ bot.start((ctx) => {
   // Save user's username , name
   userSession.userName = ctx.from.username;
   userSession.fullName = ctx.from.first_name + ctx.from.last_name;
-  // Add a random number to chack the userSession working (TODO: remove this)
-  userSession.random = Math.random();
 
   // Greetings
   ctx.reply(`
@@ -227,6 +228,17 @@ bot.start((ctx) => {
     Markup.inlineKeyboard([
       Markup.callbackButton('شروع', 'start_confirmed') // Adds a glassy button to start the process
     ]).extra());
+    
+
+    // Remove user files from last session (TODO: Ask user if he wants to reset then do this)
+    // if (!fs.existsSync(addr)) {
+    //   fs.writeFile(`${addr}/urls.txt`, '', function(err) {
+    //     if(err) {
+    //         return console.log(err);
+    //     }
+    //   }); 
+    // }
+
   }
 );
 
