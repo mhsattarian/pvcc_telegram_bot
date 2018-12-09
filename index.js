@@ -131,9 +131,20 @@ const secondScene = new Scene('get_voices')
     ctx.reply("👌");
     
     // Take voice file url to be download
-    url = bot.telegram.getFileLink(ctx.message.voice.file_id).then(url=>{
-      ctx.userSession.commandStatuses[ctx.session.choosenCommand].urls.push(url);
-    })
+    // url = bot.telegram.getFileLink(ctx.message.voice.file_id).then(url=>{
+    //   userId = getSessionKey(ctx).replace(':', '-');
+    //   addr = `./voices/${userId}/${commands.indexOf(ctx.session.choosenCommand)}`;
+    //   console.log(addr)
+    //   // ctx.userSession.commandStatuses[ctx.session.choosenCommand].urls.push(url);
+    //   fs.mkdir(addr, { recursive: true }, (err) => {
+    //     if (err) throw err;
+    //   });
+    //   fs.writeFile(`${addr}/urls.txt`, url, function(err) {
+    //     if(err) {
+    //         return console.log(err);
+    //     }
+    //   }); 
+    // })
     
     // ReEnter in current scene to ask for pronounciation again if needed
     ctx.scene.reenter();
