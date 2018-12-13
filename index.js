@@ -2,8 +2,6 @@
 // Reads the .env file and add each line in environment variables
 require('dotenv').config();
 
-// TODO: Use persianJs to correct the numbers
-
 const Telegraf = require('telegraf'), // Telegram API wrapper
   Extra = require('telegraf/extra'),
   Markup = require('telegraf/markup'),
@@ -15,7 +13,8 @@ const Telegraf = require('telegraf'), // Telegram API wrapper
   LocalSession = require('telegraf-session-local'),
   shell = require('shelljs'),
   { fork } = require('child_process'),
-  { enter } = Stage;
+  { enter } = Stage,
+  persianJS = require('persianjs');
 
 const http = require('http'),
   https = require('https'),
@@ -67,7 +66,11 @@ const sceneCleaner = () => async (ctx) => {
 
 // Show a Keyboard of Commands and their voice count
 const chooseCommandKeyboard = (userSession) => Markup.keyboard(commands.map(
-  (item)=> `${item} (${userSession.commandStatuses[item].voiceCount} از 3)`))
+  (item)=> `${item} (${
+      (userSession.commandStatuses[item].voiceCount >= 3) ? '✅' :
+      `${persianJS(userSession.commandStatuses[item].voiceCount.toString()).englishNumber()} از ۳`
+
+    })`))
   .oneTime().resize().extra()
 
 // FIRST SCENE : CHOSE YOUR COMMAND
