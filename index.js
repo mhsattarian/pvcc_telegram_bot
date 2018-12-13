@@ -30,6 +30,9 @@ const bot = new Telegraf(process.env.TG_TOKEN);
 const commands = [
   'روشن',
   'خاموش',
+  'روشن شو',
+  'ضبط کن',
+  'ماشین حساب',
   'دوربین',
   'سلفی',
   'ساعت',
