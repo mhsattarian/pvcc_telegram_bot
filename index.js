@@ -98,7 +98,7 @@ const firstScene = new Scene('choose_command')
       ctx.reply('لطفا یکی از دستورات لیست را انتخاب کنید.');
     // Stores the command choosen to be pronounced
     // (fills in first scene and uses in seconds)
-    else ctx.session.choosenCommand = command;
+    else ctx.userSession.choosenCommand = command;
     
     // If a command is spoken *less than* 3 times, go to second scene (pronouncing commands)
     if (ctx.userSession.commandStatuses[command].voiceCount < 3) {
@@ -126,16 +126,16 @@ const secondScene = new Scene('get_voices')
     const messages = []
     
     // If the command is pronounced 3 times go back to scene one (choosing commands)
-    var voiceCount = ++ctx.userSession.commandStatuses[ctx.session.choosenCommand].voiceCount;
+    var voiceCount = ++ctx.userSession.commandStatuses[ctx.userSession.choosenCommand].voiceCount;
     if (voiceCount > 3) {
       const process = fork('./downloadVoices.js');
-      process.send({ userId: getSessionKey(ctx).replace(':', '-'), voiceId: commands.indexOf(ctx.session.choosenCommand)});
+      process.send({ userId: getSessionKey(ctx).replace(':', '-'), voiceId: commands.indexOf(ctx.userSession.choosenCommand)});
       // process.on('message', (message) => {
         //   log.info(`${message.downloadedFile} downloaded`);
       // });
       
       // Cause we added once on line above
-      --ctx.userSession.commandStatuses[ctx.session.choosenCommand].voiceCount;
+      --ctx.userSession.commandStatuses[ctx.userSession.choosenCommand].voiceCount;
       ctx.userSession.remainCommands--;
       ctx.scene.enter('choose_command')
     }
@@ -150,7 +150,7 @@ const secondScene = new Scene('get_voices')
     // We want to store the urls to a file called urls.txt 
     // on a directory named based on user ids
     userId = getSessionKey(ctx).replace(':', '-');
-    addr = `./voices/${userId}/${commands.indexOf(ctx.session.choosenCommand)}`;
+    addr = `./voices/${userId}/${commands.indexOf(ctx.userSession.choosenCommand)}`;
     shell.mkdir('-p', addr);
 
     // If urls.txt file not exist create it
@@ -170,9 +170,9 @@ const secondScene = new Scene('get_voices')
     
     // Take voice file url to be download
     userId = getSessionKey(ctx).replace(':', '-');
-    fileAddr = `./voices/${userId}/${commands.indexOf(ctx.session.choosenCommand)}/urls.txt`;
+    fileAddr = `./voices/${userId}/${commands.indexOf(ctx.userSession.choosenCommand)}/urls.txt`;
     url = bot.telegram.getFileLink(ctx.message.voice.file_id).then(url=>{
-      // ctx.userSession.commandStatuses[ctx.session.choosenCommand].urls.push(url);
+      // ctx.userSession.commandStatuses[ctx.userSession.choosenCommand].urls.push(url);
       fs.appendFile(fileAddr, url + '\n', function (err) {
         if (err) throw err;
       }); 

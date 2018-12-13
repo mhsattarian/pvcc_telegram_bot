@@ -20,7 +20,9 @@ process.on('message', async (message) => {
             if (err) console.log(err)
             console.log(`${url} Downloaded in ${ addr.slice(0, addr.lastIndexOf('/'))}`)
             urls.splice(urls.indexOf(url), 1);
-            if (urls.length == 0) {
+            console.log(urls.length);
+            
+            if (urls.length <= 1) {
                 fs.unlink(addr, (err) => {
                     if (err) throw err;
                 });
