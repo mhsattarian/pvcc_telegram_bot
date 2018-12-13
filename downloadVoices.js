@@ -17,7 +17,7 @@ process.on('message', async (message) => {
         }
          
         download(url, downloadOptions, function(err){
-            if (err) throw err
+            if (err) console.log(err)
             console.log(`${url} Downloaded in ${ addr.slice(0, addr.lastIndexOf('/'))}`)
             urls.splice(urls.indexOf(url), 1);
             if (urls.length == 0) {

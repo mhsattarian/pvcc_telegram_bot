@@ -90,8 +90,11 @@ const firstScene = new Scene('choose_command')
     else ctx.session.choosenCommand = command;
     
     // If a command is spoken *less than* 3 times, go to second scene (pronouncing commands)
-    if (ctx.userSession.commandStatuses[command].voiceCount < 3)
+    if (ctx.userSession.commandStatuses[command].voiceCount < 3) {
       ctx.scene.enter('get_voices');
+      ctx.userSession.lastStage = 'get_voices';
+    }
+
     // otherwise Error to choose another command
     else ctx.reply('یکی دیگر از دستورات را انتخاب کنید:')
   })
@@ -178,7 +181,7 @@ bot.use((new LocalSession({ database: 'sessions.json',  property: 'userSession'}
 bot.use(session())
 
 // Define Bot stages (scenes)
-const stage = new Stage([firstScene, secondScene], { ttl: 100 })
+const stage = new Stage([firstScene, secondScene], { ttl: 10 })
 bot.use(stage.middleware())
 
 
@@ -207,6 +210,8 @@ bot.start((ctx) => {
   userSession.commandCounter = 0;
   // Status of each command (whether its spoken and how many times)
   userSession.commandStatuses = {}
+  // Users last stage (for controling stages and when they expire)
+  userSession.lastStage = ''
   // Creating the commandStatuses object using commands array
   commands.map(command=>{
     userSession.commandStatuses[command] = {
@@ -244,7 +249,10 @@ bot.start((ctx) => {
 
 // 2. When the شروع glassy button is pressed
 bot.action('start_confirmed', (ctx, next) => {
+  // enter first scene (Choose command)
   ctx.scene.enter('choose_command')
+  // store the last stage
+  ctx.userSession.lastStage = 'choose_command';
 });
 
 // When the شروع glassy button is pressed
@@ -262,3 +270,9 @@ bot.hears('[لغو]', ctx => {
     Extra.markup(Markup.removeKeyboard()),
   );
 });
+
+// Handle out of stage voices and texts
+// and enter the last stage that user used
+bot.on(['text', 'voice'], (ctx) => {
+  ctx.scene.enter(ctx.userSession.lastStage)
+})
