@@ -73,6 +73,11 @@ const firstScene = new Scene('choose_command')
     // [*not used now*] for storing messages to be cleared using `sceneCleaner`
     const messages = []
 
+
+    if (ctx.userSession.remainCommands == 0) {
+      return messages.push(await ctx.reply('از همکاری شما متشکریم'))  
+    }
+
     // show a keyboard to user to choose between commands
     messages.push(await ctx.reply('یکی از دستورات را انتخاب کنید:', chooseCommandKeyboard(ctx.userSession)))
     
@@ -117,13 +122,15 @@ const secondScene = new Scene('get_voices')
     // If the command is pronounced 3 times go back to scene one (choosing commands)
     var voiceCount = ++ctx.userSession.commandStatuses[ctx.session.choosenCommand].voiceCount;
     if (voiceCount > 3) {
-      // Cause we added once on line above
       const process = fork('./downloadVoices.js');
       process.send({ userId: getSessionKey(ctx).replace(':', '-'), voiceId: commands.indexOf(ctx.session.choosenCommand)});
       // process.on('message', (message) => {
-      //   log.info(`${message.downloadedFile} downloaded`);
+        //   log.info(`${message.downloadedFile} downloaded`);
       // });
+      
+      // Cause we added once on line above
       --ctx.userSession.commandStatuses[ctx.session.choosenCommand].voiceCount;
+      ctx.userSession.remainCommands--;
       ctx.scene.enter('choose_command')
     }
     else{
@@ -209,9 +216,11 @@ bot.start((ctx) => {
   // Number of the command to get its voice
   userSession.commandCounter = 0;
   // Status of each command (whether its spoken and how many times)
-  userSession.commandStatuses = {}
+  userSession.commandStatuses = {};
   // Users last stage (for controling stages and when they expire)
-  userSession.lastStage = ''
+  userSession.lastStage = '';
+  // trace how many Commands to go
+  userSession.remainCommands = commands.length;
   // Creating the commandStatuses object using commands array
   commands.map(command=>{
     userSession.commandStatuses[command] = {
