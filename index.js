@@ -142,13 +142,13 @@ const firstScene = new Scene('choose_command')
         ctx.scene.enter('get_voices');
         ctx.userSession.lastStage = 'get_voices';
       }
+      // otherwise Error to choose another command
+      else ctx.reply('یکی دیگر از دستورات را انتخاب کنید:')
     }
     catch{
       ctx.scene.reenter();
     }
 
-    // otherwise Error to choose another command
-    else ctx.reply('یکی دیگر از دستورات را انتخاب کنید:')
   })
   // if user tryed to send a recoreded voice in this scene Error
   .on('voice', (ctx)=>ctx.reply("لطفا اول یک دستور را انتخاب کنید"))
