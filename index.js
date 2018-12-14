@@ -83,9 +83,13 @@ const firstScene = new Scene('choose_command')
     // [*not used now*] for storing messages to be cleared using `sceneCleaner`
     const messages = []
 
-
+    // Finnish Message
     if (ctx.userSession.remainCommands == 0) {
-      return messages.push(await ctx.reply('از همکاری شما متشکریم'))  
+      return messages.push(await ctx.reply(`
+        از شما واقعا ممنونیم که تمامی دستورات را انجام دادید.
+        می‌توانید دستورات مربوط به خودتون رو در آدرس زیر مشاهده کنید:
+        http://dataset.class.vision/pvcc/voices/${getSessionKey(ctx).replace(':', '-')}
+      `));  
     }
 
     // show a keyboard to user to choose between commands
