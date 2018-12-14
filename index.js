@@ -14,7 +14,8 @@ const Telegraf = require('telegraf'), // Telegram API wrapper
   shell = require('shelljs'),
   { fork } = require('child_process'),
   { enter } = Stage,
-  persianJS = require('persianjs');
+  persianJS = require('persianjs'),
+  rimraf = require('rimraf');
 
 const http = require('http'),
   https = require('https'),
@@ -93,13 +94,15 @@ const firstScene = new Scene('choose_command')
     // cuase command had become (روشن (0 از 3))
     command = ctx.message.text.split(' ')[0];
     
+    
     // Error if input text not in commands
-    if (!commands.includes(command)) 
-      ctx.reply('لطفا یکی از دستورات لیست را انتخاب کنید.');
+    if (!commands.includes(command)) {
+      return ctx.scene.reenter()
+    }
     // Stores the command choosen to be pronounced
     // (fills in first scene and uses in seconds)
     else ctx.userSession.choosenCommand = command;
-    
+  
     // If a command is spoken *less than* 3 times, go to second scene (pronouncing commands)
     if (ctx.userSession.commandStatuses[command].voiceCount < 3) {
       ctx.scene.enter('get_voices');
@@ -215,8 +218,7 @@ getSessionKey = (ctx) => {
 
 // TODO : chack if user has aleardy done some commands, dont clear it's history
 
-// 1. Initializations and greetings
-bot.start((ctx) => {
+function botInitilizer (ctx) {
   // choose active user's session from the session object
   var userSession = ctx.userSession;
   // Number of the command to get its voice
@@ -241,26 +243,31 @@ bot.start((ctx) => {
 
   // Greetings
   ctx.reply(`
-    با سلام ${userSession.userName || userSession.fullName}.
-    ممنونیم که وقت خودتون رو در اختیار ما گذاشته و به جمع‌آوری دیتاستی از دستورات فارسی کمک می‌کنید 🙏. در ادامه پس از انتخاب گزینه شروع، در هر مرتبه یک دستور به شما نمایش داده می‌شود و از شما خواسته می‌شود که آن را سه بار ضبط کرده و ارسال کنید.
-    برای شروع گزینه زیر را نتخاب کنید:
-    `,
-    Markup.inlineKeyboard([
-      Markup.callbackButton('شروع', 'start_confirmed') // Adds a glassy button to start the process
-    ]).extra());
-    
+  با سلام ${userSession.userName || userSession.fullName}.
+  ممنونیم که وقت خودتون رو در اختیار ما گذاشته و به جمع‌آوری دیتاستی از دستورات فارسی کمک می‌کنید 🙏. در ادامه پس از انتخاب گزینه شروع، در هر مرتبه یک دستور به شما نمایش داده می‌شود و از شما خواسته می‌شود که آن را سه بار ضبط کرده و ارسال کنید.
+  برای شروع گزینه زیر را نتخاب کنید:
+  `,
+  Markup.inlineKeyboard([
+    Markup.callbackButton('شروع', 'start_confirmed') // Adds a glassy button to start the process
+  ]).extra());
+}
 
-    // Remove user files from last session (TODO: Ask user if he wants to reset then do this)
-    // if (!fs.existsSync(addr)) {
-    //   fs.writeFile(`${addr}/urls.txt`, '', function(err) {
-    //     if(err) {
-    //         return console.log(err);
-    //     }
-    //   }); 
-    // }
-
+// 1. Initializations and greetings
+bot.start((ctx) => {
+  // Chack if User has already initilized the bot and has account in sessions
+  if ('userName' in ctx.userSession) {
+    // Check if user wants to delete voices and restart
+    ctx.reply(`شما پیش از این ربات را فعال کرده‌اید.
+    اگر مایلید تا دستورات ثبت‌شده را پاک کرده و از ابتدا شروع کنید گزینه زیر را انتخاب کنید:`,
+      Markup.inlineKeyboard([
+        Markup.callbackButton('شروع مجدد', 'reStart') // Adds a glassy button to start the process
+      ]).extra());
   }
-);
+  else {
+    // Initializes and Greetings
+    botInitilizer(ctx); 
+  }
+});
 
 // 2. When the شروع glassy button is pressed
 bot.action('start_confirmed', (ctx, next) => {
@@ -268,6 +275,18 @@ bot.action('start_confirmed', (ctx, next) => {
   ctx.scene.enter('choose_command')
   // store the last stage
   ctx.userSession.lastStage = 'choose_command';
+});
+
+// When user chosed to restart the bot
+bot.action('reStart', (ctx, next) => {
+  // Clear all User data
+  ctx.userSession = {}
+  // Remove user voices
+  rimraf(`./voices/${getSessionKey(ctx).replace(':', '-')}`, function () {
+    console.log('User data deleted.');
+  });
+  // Initilize the bot again
+  botInitilizer(ctx);
 });
 
 // When the شروع glassy button is pressed
@@ -289,5 +308,6 @@ bot.hears('[لغو]', ctx => {
 // Handle out of stage voices and texts
 // and enter the last stage that user used
 bot.on(['text', 'voice'], (ctx) => {
-  ctx.scene.enter(ctx.userSession.lastStage)
+  if ('lastStage' in ctx.userSession) 
+    ctx.scene.enter(ctx.userSession.lastStage)
 })
