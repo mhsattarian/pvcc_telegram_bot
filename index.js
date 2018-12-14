@@ -137,9 +137,14 @@ const firstScene = new Scene('choose_command')
     else ctx.userSession.choosenCommand = command;
   
     // If a command is spoken *less than* 3 times, go to second scene (pronouncing commands)
-    if (ctx.userSession.commandStatuses[command].voiceCount < 3) {
-      ctx.scene.enter('get_voices');
-      ctx.userSession.lastStage = 'get_voices';
+    try{
+      if (ctx.userSession.commandStatuses[command].voiceCount < 3) {
+        ctx.scene.enter('get_voices');
+        ctx.userSession.lastStage = 'get_voices';
+      }
+    }
+    catch{
+      ctx.scene.reenter();
     }
 
     // otherwise Error to choose another command
@@ -230,7 +235,7 @@ bot.use((new LocalSession({ database: 'sessions.json',  property: 'userSession'}
 bot.use(session())
 
 // Define Bot stages (scenes)
-const stage = new Stage([firstScene, secondScene], { ttl: 100 })
+const stage = new Stage([firstScene, secondScene], { ttl: 10 })
 bot.use(stage.middleware())
 
 
