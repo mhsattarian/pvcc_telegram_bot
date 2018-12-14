@@ -124,7 +124,8 @@ const firstScene = new Scene('choose_command')
   })
   .on('text', async (ctx)=>{
     // cuase command had become (روشن (0 از 3))
-    command = ctx.message.text.split(' ')[0];
+    txt = ctx.message.text;
+    command = txt.slice(0, txt.lastIndexOf(' '));
     
     
     // Error if input text not in commands
