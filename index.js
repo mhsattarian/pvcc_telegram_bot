@@ -70,11 +70,9 @@ const sceneCleaner = () => async (ctx) => {
 
 // Show a Keyboard of Commands and their voice count
 const chooseCommandKeyboard = (userSession) => Markup.keyboard(commands.map(
-  (item)=> `${item} (${
-      (userSession.commandStatuses[item].voiceCount >= 3) ? '✅' :
-      `${persianJS(userSession.commandStatuses[item].voiceCount.toString()).englishNumber()} از ۳`
-
-    })`))
+  (item)=> `${item}${
+      (userSession.commandStatuses[item].voiceCount >= 3) ? ' ✅' : ''
+    }`))
   .oneTime().resize().extra()
 
 // FIRST SCENE : CHOSE YOUR COMMAND
@@ -125,7 +123,8 @@ const firstScene = new Scene('choose_command')
   .on('text', async (ctx)=>{
     // cuase command had become (روشن (0 از 3))
     txt = ctx.message.text;
-    command = txt.slice(0, txt.lastIndexOf(' '));
+    command = txt;
+    console.log(command)
     
     
     // Error if input text not in commands
