@@ -349,7 +349,12 @@ bot.command('session', ctx => {
 // and enter the last stage that user used
 bot.on(['text', 'voice'], (ctx) => {
   if ('lastStage' in ctx.userSession) 
-    ctx.scene.enter(ctx.userSession.lastStage)
+    try {
+      ctx.scene.enter(ctx.userSession.lastStage)
+    }
+    catch{
+      ctx.scene.enter('choose_command')
+    }
 })
 
 // help command - shows usage instructions
