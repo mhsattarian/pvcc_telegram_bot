@@ -111,13 +111,13 @@ const firstScene = new Scene('choose_command')
   })
   .command('credit', ctx => {
     ctx.reply(`
-    لطفا انتقادات، باخورد‌ها و پیشنهادهای خود را به @MH_Sattarian و @AM_Ghoreyshi ارسال کنید.
+    لطفا انتقادات، بازخورد‌ها و پیشنهادهای خود را به @MH_Sattarian و @AM_Ghoreyshi ارسال کنید.
     `);
   })
   .command('myvoices', ctx => {
     ctx.reply(`
       شما می‌توانید ویس‌های مربوطه خود را در آدرس زیر مشاهده کنید:
-      http://dataset.class.vision/${getSessionKey(ctx).replace(':', '-')}
+      http://dataset.class.vision/pvcc/voices/${getSessionKey(ctx).replace(':', '-')}
     `);
   })
   .on('text', async (ctx)=>{
@@ -367,7 +367,7 @@ bot.command('info', ctx => {
 // credit command - shows developers credit
 bot.command('credit', ctx => {
   ctx.reply(`
-  لطفا انتقادات، باخورد‌ها و پیشنهادهای خود را به @MH_Sattarian و @AM_Ghoreyshi ارسال کنید.
+  لطفا انتقادات، بازخورد‌ها و پیشنهادهای خود را به @MH_Sattarian و @AM_Ghoreyshi ارسال کنید.
   `);
 });
 
