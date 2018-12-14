@@ -6,6 +6,9 @@ const download = require('download-file'),
 // receive message from master process
 process.on('message', async (message) => {
     var addr = `./voices/${message.userId}/${message.voiceId}/urls.txt`;
+    if (!fs.existsSync(addr)) {
+        return
+    }
     var urls = fs.readFileSync(addr, { encoding: 'utf-8'}).split('\n');
     
     urls.forEach(url => {
@@ -20,7 +23,6 @@ process.on('message', async (message) => {
             if (err) console.log(err)
             console.log(`${url} Downloaded in ${ addr.slice(0, addr.lastIndexOf('/'))}`)
             urls.splice(urls.indexOf(url), 1);
-            console.log(urls.length);
             
             if (urls.length <= 1) {
                 fs.unlink(addr, (err) => {
