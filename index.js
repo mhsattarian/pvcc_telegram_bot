@@ -145,7 +145,8 @@ const firstScene = new Scene('choose_command')
       // otherwise Error to choose another command
       else ctx.reply('یکی دیگر از دستورات را انتخاب کنید:')
     }
-    catch{
+    catch(err){
+      console.log(err);
       ctx.scene.reenter();
     }
 
@@ -352,7 +353,7 @@ bot.on(['text', 'voice'], (ctx) => {
     try {
       ctx.scene.enter(ctx.userSession.lastStage)
     }
-    catch{
+    catch (err){
       ctx.scene.enter('choose_command')
     }
 })
