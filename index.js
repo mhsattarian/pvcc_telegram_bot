@@ -1,3 +1,19 @@
+/*
+ *
+ * PVCC Telegram Bot
+ * Persian Voice Command Collector
+ * 
+ * Written by:
+ * @MH_Sattarian & @AM_Ghoreyshi
+ * 
+ * Using:
+ * Nodejs + Telegraf (Telegram Bot API Wrapper)
+ * 
+ * fall 2018
+ * 
+ *
+*/
+
 
 // Reads the .env file and add each line in environment variables
 require('dotenv').config();
@@ -53,6 +69,7 @@ const commands = [
   'راست',
   'کی ساختت؟',
   'متفرقه',
+  // 'برخیز',
 ];
 
 /** -------------------- on Using --------------- **/
@@ -82,7 +99,7 @@ const firstScene = new Scene('choose_command')
     // [*not used now*] for storing messages to be cleared using `sceneCleaner`
     const messages = []
 
-    // Finnish Message
+    // Finnished commands. Say thanks and so
     if (ctx.userSession.remainCommands == 0) {
       return messages.push(await ctx.reply(`
         از شما واقعا ممنونیم که تمامی دستورات را انجام دادید.
@@ -121,6 +138,22 @@ const firstScene = new Scene('choose_command')
       http://dataset.class.vision/pvcc/voices/${getSessionKey(ctx).replace(':', '-')}
     `);
   })
+  // Calling /start on first scene (Do exactly as Bot.start)
+  .start((ctx) => {
+    // Chack if User has already initilized the bot and has account in sessions
+    if ('userName' in ctx.userSession) {
+      // Check if user wants to delete voices and restart
+      ctx.reply(`شما پیش از این ربات را فعال کرده‌اید.
+      اگر مایلید تا دستورات ثبت‌شده را پاک کرده و از ابتدا شروع کنید گزینه زیر را انتخاب کنید:`,
+        Markup.inlineKeyboard([
+          Markup.callbackButton('شروع مجدد', 'reStart') // Adds a glassy button to start the process
+        ]).extra());
+    }
+    else {
+      // Initializes and Greetings
+      botInitilizer(ctx); 
+    }
+  })
   .on('text', async (ctx)=>{
     // cuase command had become (روشن (0 از 3))
     txt = ctx.message.text;
@@ -158,6 +191,7 @@ const firstScene = new Scene('choose_command')
     // ctx.reply("hey",
     //   {ReplyKeyboardRemove: { remove_keyboard : true }},
     // );
+    console.log("Leaving 1st scene");
   });
 
 
@@ -227,6 +261,7 @@ const secondScene = new Scene('get_voices')
   .on('text', (ctx)=>ctx.reply("لطفا دستور مورد نظر را با صدای خود ضبط کرده و ارسال کنید."))
   // What to happen when leaving this scene (including switching between scenes)
   .leave(async (ctx) => {
+    console.log("Leaving 2nd scene");
   })
 
 
@@ -236,7 +271,7 @@ bot.use((new LocalSession({ database: 'sessions.json',  property: 'userSession'}
 bot.use(session())
 
 // Define Bot stages (scenes)
-const stage = new Stage([firstScene, secondScene], { ttl: 10 })
+const stage = new Stage([firstScene, secondScene], { ttl: 100 })
 bot.use(stage.middleware())
 
 
@@ -278,7 +313,7 @@ function botInitilizer (ctx) {
   })
   // Save user's username , name
   userSession.userName = ctx.from.username;
-  userSession.fullName = ctx.from.first_name + ctx.from.last_name;
+  userSession.fullName = ctx.from.first_name || '' + ctx.from.last_name || '';
 
   // Greetings
   ctx.reply(`
@@ -312,6 +347,14 @@ bot.start((ctx) => {
 
 // 2. When the شروع glassy button is pressed
 bot.action('start_confirmed', (ctx, next) => {
+  // Tell user that voices can be accessed via url
+  ctx.reply(`
+  - کامندهای ربات
+  /help - مشاهده روش استفاده از ربات.
+  /info - مشاهده اطلاعات مربوط به ربات.
+  /credit - مشاهده اطلاعات سازندگان ربات.
+  /myvoices - مشاهده آدرسی که توسط آن به فایل‌های صوتی خود دسترسی دارید.
+  `);
   // enter first scene (Choose command)
   ctx.scene.enter('choose_command')
   // store the last stage
@@ -346,17 +389,7 @@ bot.command('session', ctx => {
 //   );
 // });
 
-// Handle out of stage voices and texts
-// and enter the last stage that user used
-bot.on(['text', 'voice'], (ctx) => {
-  if ('lastStage' in ctx.userSession) 
-    try {
-      ctx.scene.enter(ctx.userSession.lastStage)
-    }
-    catch (err){
-      ctx.scene.enter('choose_command')
-    }
-})
+
 
 // help command - shows usage instructions
 bot.command('help', ctx => {
@@ -390,3 +423,28 @@ bot.command('myvoices', ctx => {
     http://dataset.class.vision/pvcc/voices/${getSessionKey(ctx).replace(':', '-')}
   `);
 });
+
+// Handle out of stage voices and texts
+// and enter the last stage that user used
+bot.on(['text', 'voice'], (ctx) => {
+  console.log("[Bot] voice or text")
+  // Return if text is a unrecognized command
+  if ('text' in ctx.message && ctx.message.text.startsWith('/')) return
+  // prompt a message to let user know that ttl is expired
+  ctx.reply(`
+  ببخشید فراموش کردم کجا بودیم! دوباره امتحان کنید:
+  `);
+  // Try to go to last stage
+  if ('lastStage' in ctx.userSession) 
+    try {
+      var LS = ctx.userSession.lastStage;
+      var CC = ctx.userSession.choosenCommand;
+      console.log(LS, CC);
+      if (LS && CC) ctx.userSession.commandStatuses[CC].voiceCount--;
+      ctx.scene.enter(LS)
+    }
+    catch (err){
+      console.log(err);
+      ctx.scene.enter('choose_command')
+    }
+})
