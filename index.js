@@ -24,37 +24,10 @@ require('dotenv').config();
 // Adding the Logger
 const winston = require('winston');
 const { combine, timestamp, label, prettyPrint } = winston.format;
-const logger = winston.createLogger({
-  level: 'info',
-  format: combine(
-    timestamp(),
-    prettyPrint()
-  ),
-  transports: [
-    //
-    // - Write to all logs with level `info` and below to `combined.log` 
-    // - Write all logs error (and below) to `error.log`.
-    //
-    new winston.transports.File({ filename: './logs/error.log', level: 'error' }),
-    new winston.transports.File({ filename: './logs/combined.log' })
-  ]
-});
+const logger;
+handleLogger();
 
-// If we're not in production then log to the `console` with the format:
-// `${info.level}: ${info.message} JSON.stringify({ ...rest }) `
-// 
-if (process.env.NODE_ENV !== 'production') {
-  logger.add(new winston.transports.Console({
-    format: winston.format.simple()
-  }));
-}
 
-logger.log({
-  level: 'info',
-  message: 'Hello distributed log files!'
-});
-
-logger.log("test");
 
 const Telegraf = require('telegraf'), // Telegram Bot API wrapper
   Extra = require('telegraf/extra'),
@@ -494,3 +467,31 @@ bot.on(['text', 'voice'], (ctx) => {
       ctx.scene.enter('choose_command')
     }
 })
+
+
+function handleLogger() {
+  logger = winston.createLogger({
+    level: 'info',
+    format: combine(
+      timestamp(),
+      prettyPrint()
+    ),
+    transports: [
+      //
+      // - Write to all logs with level `info` and below to `combined.log` 
+      // - Write all logs error (and below) to `error.log`.
+      //
+      new winston.transports.File({ filename: './logs/error.log', level: 'error' }),
+      new winston.transports.File({ filename: './logs/combined.log' })
+    ]
+  });
+  
+  // If we're not in production then log to the `console` with the format:
+  // `${info.level}: ${info.message} JSON.stringify({ ...rest }) `
+  // 
+  if (process.env.NODE_ENV !== 'production') {
+    logger.add(new winston.transports.Console({
+      format: winston.format.simple()
+    }));
+  }
+}
