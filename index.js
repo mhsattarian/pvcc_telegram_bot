@@ -31,7 +31,8 @@ const Telegraf = require('telegraf'), // Telegram API wrapper
   { fork } = require('child_process'),
   { enter } = Stage,
   persianJS = require('persianjs'),
-  rimraf = require('rimraf');
+  rimraf = require('rimraf'),
+  f2f = require('f2f');
 
 const http = require('http'),
   https = require('https'),
@@ -69,10 +70,15 @@ const commands = [
   'راست',
   'کی ساختت؟',
   'متفرقه',
-  // 'برخیز',
+  'برخیز',
 ];
 
+// Initilize the Finglish to Farsi Class
+const F2F = new f2f();
+
 // Assign an id to commands
+commandIds = {}
+commands.forEach(command => commandIds[command] = F2F.simplef2f(command))
 
 
 
