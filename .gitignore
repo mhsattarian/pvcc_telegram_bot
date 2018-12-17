@@ -2,6 +2,7 @@
 node_modules/
 New folder/
 voices/
+logs/
 
 # Files
 .env

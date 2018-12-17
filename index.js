@@ -1,24 +1,62 @@
 /*
  *
- * PVCC Telegram Bot
- * Persian Voice Command Collector
+ * PVCC Telegram Bot (@pvcc_bot)[https://telegram.me/pvcc_bot]
+ * Persian Voice Command Collector 
  * 
  * Written by:
- * @MH_Sattarian & @AM_Ghoreyshi
+ * Mohammad Hassan Sattarian   @MH_Sattarian
+ * Amir Mohammad Ghoreyshi     @AM_Ghoreyshi
  * 
  * Using:
  * Nodejs + Telegraf (Telegram Bot API Wrapper)
  * 
+ * SRU University
  * fall 2018
  * 
- *
+ * 
 */
 
 
 // Reads the .env file and add each line in environment variables
+// uses for telegram bot api token
 require('dotenv').config();
 
-const Telegraf = require('telegraf'), // Telegram API wrapper
+// Adding the Logger
+const winston = require('winston');
+const { combine, timestamp, label, prettyPrint } = winston.format;
+const logger = winston.createLogger({
+  level: 'info',
+  format: combine(
+    timestamp(),
+    prettyPrint()
+  ),
+  transports: [
+    //
+    // - Write to all logs with level `info` and below to `combined.log` 
+    // - Write all logs error (and below) to `error.log`.
+    //
+    new winston.transports.File({ filename: './logs/error.log', level: 'error' }),
+    new winston.transports.File({ filename: './logs/combined.log' })
+  ]
+});
+
+// If we're not in production then log to the `console` with the format:
+// `${info.level}: ${info.message} JSON.stringify({ ...rest }) `
+// 
+if (process.env.NODE_ENV !== 'production') {
+  logger.add(new winston.transports.Console({
+    format: winston.format.simple()
+  }));
+}
+
+logger.log({
+  level: 'info',
+  message: 'Hello distributed log files!'
+});
+
+logger.log("test");
+
+const Telegraf = require('telegraf'), // Telegram Bot API wrapper
   Extra = require('telegraf/extra'),
   Markup = require('telegraf/markup'),
   Composer = require('telegraf/composer'),
@@ -39,8 +77,9 @@ const http = require('http'),
   fs = require('fs');
 
 
+  /** -------------------- Initilizations --------------- **/
 
-// connects to Bot using the Token
+// Initilizes and connects to Bot using the Token
 const bot = new Telegraf(process.env.TG_TOKEN);
 
 // Persian Commands to Be spoken!
@@ -53,6 +92,7 @@ const commands = [
   'ماشین حساب',
   'گرامافون',
   'شروع کن',
+  'برخیز',
   'دوربین',
   'سلفی',
   'ساعت',
@@ -69,14 +109,13 @@ const commands = [
   'چپ',
   'راست',
   'کی ساختت؟',
-  'متفرقه',
-  'برخیز',
+  'متفرقه', // TODO: Add the ability to lable the other commands
 ];
 
 // Initilize the Finglish to Farsi Class
 const F2F = new f2f();
 
-// Assign an id to commands
+// Assign an id to commands (id is command in finglish)
 commandIds = {}
 commands.forEach(command => commandIds[command] = F2F.simplef2f(command))
 
@@ -84,7 +123,7 @@ commands.forEach(command => commandIds[command] = F2F.simplef2f(command))
 
 /** -------------------- on Using --------------- **/
 
-// [*not using now*] A helper function to clear all messages from this scene (not from user)
+// [*not using now*] A helper function to clear all messages from the bot in this scene
 const sceneCleaner = () => async (ctx) => {
   // Should store messages in message property of scene's state
   ctx.scene.state.messages.forEach(({ message_id: id }) => {
@@ -99,18 +138,18 @@ const sceneCleaner = () => async (ctx) => {
 // Show a Keyboard of Commands and their voice count
 const chooseCommandKeyboard = (userSession) => Markup.keyboard(commands.map(
   (item)=> `${item}${
-      (userSession.commandStatuses[item].voiceCount >= 3) ? ' ✅' : ''
+      ((userSession.commandStatuses[item].voiceCount || 0) >= 3) ? ' ✅' : ''
     }`))
   .oneTime().resize().extra()
 
-// FIRST SCENE : CHOSE YOUR COMMAND
+// 3. FIRST SCENE : CHOSE YOUR COMMAND
 const firstScene = new Scene('choose_command')
   .enter(async (ctx) => {
     // [*not used now*] for storing messages to be cleared using `sceneCleaner`
-    const messages = []
+    // const messages = []
 
     // Finnished commands. Say thanks and so
-    if (ctx.userSession.remainCommands == 0) {
+    if (ctx.userSession.remainCommands >= 3) {
       return messages.push(await ctx.reply(`
         از شما واقعا ممنونیم که تمامی دستورات را انجام دادید.
         می‌توانید دستورات مربوط به خودتون رو در آدرس زیر مشاهده کنید:
@@ -119,17 +158,17 @@ const firstScene = new Scene('choose_command')
     }
 
     // show a keyboard to user to choose between commands
-    messages.push(await ctx.reply('یکی از دستورات را انتخاب کنید:', chooseCommandKeyboard(ctx.userSession)))
-    
+    // messages.push()
+    await ctx.reply('یکی از دستورات را انتخاب کنید:', chooseCommandKeyboard(ctx.userSession))
     // ctx.scene.state.messages = messages
   })
-  .command('help', ctx => {
-    ctx.reply(`
-    نحوه کار ربات بدین صورت است که در هر مرتبه یک دستور به شما نمایش داده می‌شود و از شما خواسته می‌شود که صدای خود در حین خواندن آن دستور را سه مرتبه ضبط کرده و ارسال کنید.
-    در حین ضبط یک دستور، یعنی زمانی که هنوز برای بار سوم دستور را نخوانده و ارسال نکرده‌اید از ارسال متن و یا کامند به بات خودداری کنید.
-    پس از اتمام دستورات و یا با استفاده از کامند /myvoices می‌توانید آدرسی که فایل صوتی دستورات مربوط به شما در آن ذخیره می‌شود را مشاهده کنید.
-    `);
-  })
+  // .command('help', ctx => {
+  //   ctx.reply(`
+  //   نحوه کار ربات بدین صورت است که در هر مرتبه یک دستور به شما نمایش داده می‌شود و از شما خواسته می‌شود که صدای خود در حین خواندن آن دستور را سه مرتبه ضبط کرده و ارسال کنید.
+  //   در حین ضبط یک دستور، یعنی زمانی که هنوز برای بار سوم دستور را نخوانده و ارسال نکرده‌اید از ارسال متن و یا کامند به بات خودداری کنید.
+  //   پس از اتمام دستورات و یا با استفاده از کامند /myvoices می‌توانید آدرسی که فایل صوتی دستورات مربوط به شما در آن ذخیره می‌شود را مشاهده کنید.
+  //   `);
+  // })
   .command('info', ctx => {
     ctx.reply(`
     هدف این ربات جمع‌آوری داده‌های صوتی مورد نیاز برای آموزش یک مدل یادگیری عمیق است که قادر به تشخیص دستورات فارسی باشد.
@@ -258,7 +297,6 @@ const secondScene = new Scene('get_voices')
     userId = getSessionKey(ctx).replace(':', '-');
     fileAddr = `./voices/${userId}/${commands.indexOf(ctx.userSession.choosenCommand)}/urls.txt`;
     url = bot.telegram.getFileLink(ctx.message.voice.file_id).then(url=>{
-      // ctx.userSession.commandStatuses[ctx.userSession.choosenCommand].urls.push(url);
       fs.appendFile(fileAddr, url + '\n', function (err) {
         if (err) throw err;
       }); 
@@ -272,7 +310,7 @@ const secondScene = new Scene('get_voices')
   // What to happen when leaving this scene (including switching between scenes)
   .leave(async (ctx) => {
     console.log("Leaving 2nd scene");
-  })
+  });
 
 
 // Initialize the session (from now on the session object of ctx can be accessed)
@@ -300,25 +338,30 @@ getSessionKey = (ctx) => {
 
 /** -------------------- on START --------------- **/
 
-// TODO : chack if user has aleardy done some commands, dont clear it's history
+// help command - shows usage instructions
+bot.command('help', ctx => {
+  ctx.reply(`
+  نحوه کار ربات بدین صورت است که در هر مرتبه یک دستور به شما نمایش داده می‌شود و از شما خواسته می‌شود که صدای خود در حین خواندن آن دستور را سه مرتبه ضبط کرده و ارسال کنید.
+  در حین ضبط یک دستور، یعنی زمانی که هنوز برای بار سوم دستور را نخوانده و ارسال نکرده‌اید از ارسال متن و یا کامند به بات خودداری کنید.
+  پس از اتمام دستورات و یا با استفاده از کامند /myvoices می‌توانید آدرسی که فایل صوتی دستورات مربوط به شما در آن ذخیره می‌شود را مشاهده کنید.
+  `);
+});
+
+// TODO: it old user, and wants to restart, ask for clearing data or not
 
 function botInitilizer (ctx) {
   // choose active user's session from the session object
   var userSession = ctx.userSession;
   // Number of the command to get its voice
   userSession.commandCounter = 0;
-  // Status of each command (whether its spoken and how many times)
-  userSession.commandStatuses = {};
   // Users last stage (for controling stages and when they expire)
   userSession.lastStage = '';
-  // trace how many Commands to go
-  userSession.remainCommands = commands.length;
-  // Creating the commandStatuses object using commands array
+  // Status of each command (whether its spoken and how many times)
+  userSession.commandStatuses = {};
   commands.map(command=>{
     userSession.commandStatuses[command] = {
-      done: false,
-      voiceCount : 0,
-      urls : []
+      done: false, // each command should be sponek at least 3 times
+      voiceCount : 0, // how many times this command is spoken
     }
   })
   // Save user's username , name
@@ -327,14 +370,14 @@ function botInitilizer (ctx) {
 
   // Greetings
   ctx.reply(`
-  سلام ${userSession.userName || userSession.fullName}.
+  سلام ${userSession.userName /*||*/ + userSession.fullName}.
   ممنونیم که وقت خودتون رو در اختیار ما گذاشته و به جمع‌آوری دیتاستی از دستورات فارسی کمک می‌کنید.
   در ادامه پس از انتخاب گزینه شروع، در هر مرتبه یک دستور به شما نمایش داده می‌شود و از شما خواسته می‌شود که صدای خود در حین خواندن آن دستور را سه مرتبه ضبط کرده و ارسال کنید.
   توجه کنید که اطلاعات نامعتبر پس از بررسی حذف خواهند شد.
   برای شروع گزینه زیر را انتخاب کنید:
   `,
   Markup.inlineKeyboard([
-    Markup.callbackButton('شروع', 'start_confirmed') // Adds a glassy button to start the process
+    Markup.callbackButton('شروع', 'start_confirmed') // Adds a glassy button to start the bot
   ]).extra());
 }
 
@@ -357,13 +400,13 @@ bot.start((ctx) => {
 
 // 2. When the شروع glassy button is pressed
 bot.action('start_confirmed', (ctx, next) => {
-  // Tell user that voices can be accessed via url
+  // Tell user about the bot's commands
   ctx.reply(`
   - کامندهای ربات
-  /help - مشاهده روش استفاده از ربات.
-  /info - مشاهده اطلاعات مربوط به ربات.
-  /credit - مشاهده اطلاعات سازندگان ربات.
-  /myvoices - مشاهده آدرسی که توسط آن به فایل‌های صوتی خود دسترسی دارید.
+  /help - مشاهده روش استفاده از ربات
+  /info - مشاهده اطلاعات مربوط به ربات
+  /credit - مشاهده اطلاعات سازندگان ربات
+  /myvoices - مشاهده آدرسی که توسط آن به فایل‌های صوتی خود دسترسی دارید
   `);
   // enter first scene (Choose command)
   ctx.scene.enter('choose_command')
@@ -401,14 +444,7 @@ bot.command('session', ctx => {
 
 
 
-// help command - shows usage instructions
-bot.command('help', ctx => {
-  ctx.reply(`
-  نحوه کار ربات بدین صورت است که در هر مرتبه یک دستور به شما نمایش داده می‌شود و از شما خواسته می‌شود که صدای خود در حین خواندن آن دستور را سه مرتبه ضبط کرده و ارسال کنید.
-  در حین ضبط یک دستور، یعنی زمانی که هنوز برای بار سوم دستور را نخوانده و ارسال نکرده‌اید از ارسال متن و یا کامند به بات خودداری کنید.
-  پس از اتمام دستورات و یا با استفاده از کامند /myvoices می‌توانید آدرسی که فایل صوتی دستورات مربوط به شما در آن ذخیره می‌شود را مشاهده کنید.
-  `);
-});
+
 
 // info command - shows information about the bot
 bot.command('info', ctx => {
