@@ -72,6 +72,10 @@ const commands = [
   // 'برخیز',
 ];
 
+// Assign an id to commands
+
+
+
 /** -------------------- on Using --------------- **/
 
 // [*not using now*] A helper function to clear all messages from this scene (not from user)
