@@ -28,7 +28,6 @@ const logger;
 handleLogger();
 
 
-
 const Telegraf = require('telegraf'), // Telegram Bot API wrapper
   Extra = require('telegraf/extra'),
   Markup = require('telegraf/markup'),
@@ -50,7 +49,8 @@ const http = require('http'),
   fs = require('fs');
 
 
-  /** -------------------- Initilizations --------------- **/
+
+/** -------------------- Initilizations --------------- **/
 
 // Initilizes and connects to Bot using the Token
 const bot = new Telegraf(process.env.TG_TOKEN);
@@ -121,8 +121,8 @@ const firstScene = new Scene('choose_command')
     // [*not used now*] for storing messages to be cleared using `sceneCleaner`
     // const messages = []
 
-    // Finnished commands. Say thanks and so
-    if (ctx.userSession.remainCommands >= 3) {
+    // Finnished commands. Say thanks and so (TODO: Change the system!)
+    if (ctx.userSession.commandCounter == 3) {
       return messages.push(await ctx.reply(`
         از شما واقعا ممنونیم که تمامی دستورات را انجام دادید.
         می‌توانید دستورات مربوط به خودتون رو در آدرس زیر مشاهده کنید:
@@ -135,13 +135,13 @@ const firstScene = new Scene('choose_command')
     await ctx.reply('یکی از دستورات را انتخاب کنید:', chooseCommandKeyboard(ctx.userSession))
     // ctx.scene.state.messages = messages
   })
-  // .command('help', ctx => {
-  //   ctx.reply(`
-  //   نحوه کار ربات بدین صورت است که در هر مرتبه یک دستور به شما نمایش داده می‌شود و از شما خواسته می‌شود که صدای خود در حین خواندن آن دستور را سه مرتبه ضبط کرده و ارسال کنید.
-  //   در حین ضبط یک دستور، یعنی زمانی که هنوز برای بار سوم دستور را نخوانده و ارسال نکرده‌اید از ارسال متن و یا کامند به بات خودداری کنید.
-  //   پس از اتمام دستورات و یا با استفاده از کامند /myvoices می‌توانید آدرسی که فایل صوتی دستورات مربوط به شما در آن ذخیره می‌شود را مشاهده کنید.
-  //   `);
-  // })
+  .command('help', ctx => {
+    ctx.reply(`
+    نحوه کار ربات بدین صورت است که در هر مرتبه یک دستور به شما نمایش داده می‌شود و از شما خواسته می‌شود که صدای خود در حین خواندن آن دستور را سه مرتبه ضبط کرده و ارسال کنید.
+    در حین ضبط یک دستور، یعنی زمانی که هنوز برای بار سوم دستور را نخوانده و ارسال نکرده‌اید از ارسال متن و یا کامند به بات خودداری کنید.
+    پس از اتمام دستورات و یا با استفاده از کامند /myvoices می‌توانید آدرسی که فایل صوتی دستورات مربوط به شما در آن ذخیره می‌شود را مشاهده کنید.
+    `);
+  })
   .command('info', ctx => {
     ctx.reply(`
     هدف این ربات جمع‌آوری داده‌های صوتی مورد نیاز برای آموزش یک مدل یادگیری عمیق است که قادر به تشخیص دستورات فارسی باشد.
