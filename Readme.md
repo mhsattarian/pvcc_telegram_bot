@@ -6,6 +6,13 @@ A Telegram Bot to collect Persian commands listed bellow from the user by asking
 
 `روشن` - 
 `خاموش` - 
+`روشن شو` - 
+`خاموش شو` - 
+`ضبط کن` - 
+`ماشین حساب` - 
+`گرامافون` - 
+`شروع کن` - 
+`برخیز` - 
 `دوربین` - 
 `سلفی` - 
 `ساعت` - 
@@ -21,17 +28,25 @@ A Telegram Bot to collect Persian commands listed bellow from the user by asking
 `پایین` - 
 `چپ` - 
 `راست` - 
-`کی ساخت؟`
+`کی ساخت؟` - 
+`متفرقه`
 
 ## Usage
 
 Create a `.env` file in the root of the project and add your *telegram bot token* like this line:
 
 ```shell
-TG_TOKEN=<your-tg-bot-token>
+BOT_TOKEN=<your-tg-bot-token>
+NODE_ENV='development' # or 'production'
 ```
 
-then run the code using:
+then install dependencies using:
+
+```shell
+npm i
+```
+
+finally, run the code using:
 
 ```shell
 node index.html

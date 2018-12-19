@@ -52,7 +52,7 @@ var logger;
 handleLogger();
 
 // Initilizes and connects to Bot using the Token
-const bot = new Telegraf(process.env.TG_TOKEN);
+const bot = new Telegraf(process.env.BOT_TOKEN);
 
 // Persian Commands to Be spoken!
 const commands = [
