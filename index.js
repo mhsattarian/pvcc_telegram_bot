@@ -24,7 +24,7 @@ require('dotenv').config();
 // Adding the Logger
 const winston = require('winston');
 const { combine, timestamp, label, prettyPrint } = winston.format;
-const logger;
+var logger;
 handleLogger();
 
 
@@ -118,6 +118,7 @@ const chooseCommandKeyboard = (userSession) => Markup.keyboard(commands.map(
 // 3. FIRST SCENE : CHOSE YOUR COMMAND
 const firstScene = new Scene('choose_command')
   .enter(async (ctx) => {
+    ctx.userSession.lastStage = 'choose_command';
     // [*not used now*] for storing messages to be cleared using `sceneCleaner`
     // const messages = []
 
@@ -132,6 +133,7 @@ const firstScene = new Scene('choose_command')
 
     // show a keyboard to user to choose between commands
     // messages.push()
+    await ctx.reply('1st scene')
     await ctx.reply('یکی از دستورات را انتخاب کنید:', chooseCommandKeyboard(ctx.userSession))
     // ctx.scene.state.messages = messages
   })
@@ -178,12 +180,10 @@ const firstScene = new Scene('choose_command')
   })
   .on('text', async (ctx)=>{
     // cuase command had become (روشن (0 از 3))
-    txt = ctx.message.text;
-    command = txt;
-    console.log(command)
+    command = ctx.message.text;
+    console.log("Entered: ", command)
     
-    
-    // Error if input text not in commands
+    // Ask for another command if input text not in commands
     if (!commands.includes(command)) {
       return ctx.scene.reenter()
     }
@@ -193,12 +193,15 @@ const firstScene = new Scene('choose_command')
   
     // If a command is spoken *less than* 3 times, go to second scene (pronouncing commands)
     try{
+      console.log(ctx.userSession.commandStatuses[command]);
       if (ctx.userSession.commandStatuses[command].voiceCount < 3) {
         ctx.scene.enter('get_voices');
         ctx.userSession.lastStage = 'get_voices';
       }
       // otherwise Error to choose another command
-      else ctx.reply('یکی دیگر از دستورات را انتخاب کنید:')
+      else {
+        ctx.reply('ادامه می‌دهید یا !!! یکی دیگر از دستورات را انتخاب کنید:')
+      }
     }
     catch(err){
       console.log(err);
@@ -220,8 +223,11 @@ const firstScene = new Scene('choose_command')
 // SECOND SCENE : PRONOUNCE THE COMMAND
 const secondScene = new Scene('get_voices')
   .enter((ctx) => {
+    
+    ctx.userSession.lastStage = 'get_voices';
+
     // [*not used now*] for storing messages to be cleared using `sceneCleaner`
-    const messages = []
+    // const messages = []
     
     // If the command is pronounced 3 times go back to scene one (choosing commands)
     var voiceCount = ++ctx.userSession.commandStatuses[ctx.userSession.choosenCommand].voiceCount;
@@ -235,12 +241,14 @@ const secondScene = new Scene('get_voices')
       // Cause we added once on line above
       --ctx.userSession.commandStatuses[ctx.userSession.choosenCommand].voiceCount;
       ctx.userSession.remainCommands--;
-      ctx.scene.enter('choose_command')
+      ctx.reply("More than 3 times");
+      ctx.userSession.lastStage = 'choose_command';
+      ctx.scene.enter('choose_command');
     }
     else{
       // Ask user to pronounce the command
       ctx.reply(`
-      مرتبه ${voiceCount == 1 ? '1️⃣' : voiceCount == 2 ? '2️⃣' : '3️⃣'}
+      مرتبه ${persianJs((voiceCount).toString()).digitsToWords().toString()}
       صدای خود را ضبط کرده و ارسال کنید:
       `)
     }
@@ -279,7 +287,7 @@ const secondScene = new Scene('get_voices')
     ctx.scene.reenter();
   })
   // if user tryed to type something in this scene Error
-  .on('text', (ctx)=>ctx.reply("لطفا دستور مورد نظر را با صدای خود ضبط کرده و ارسال کنید."))
+  .on('text', (ctx)=>ctx.reply("لطفا تنها دستور مورد نظر را با صدای خود ضبط کرده و ارسال کنید."))
   // What to happen when leaving this scene (including switching between scenes)
   .leave(async (ctx) => {
     console.log("Leaving 2nd scene");
@@ -427,6 +435,8 @@ bot.command('info', ctx => {
   این ربات برای پروژه درس کارشناسی در دانشگاه شهید رجایی توسعه داده‌شده و مورد استفاده قرار خواهد گرفت. البته دیتاست جمع‌آوری شده نیز به صورت عمومی در دسترس خواهد بود که می‌توانید پس از اتمام دستورات و یا با استفاده از کامند /myvoices آدرسی که فایل صوتی دستورات مربوط به شما در آن ذخیره می‌شود را مشاهده کنید.
   `);
 });
+
+// TODO: use .done for commands
 
 // credit command - shows developers credit
 bot.command('credit', ctx => {
