@@ -132,7 +132,6 @@ const firstScene = new Scene('choose_command')
 
     // show a keyboard to user to choose between commands
     // messages.push()
-    await ctx.reply('1st scene')
     await ctx.reply('یکی از دستورات را انتخاب کنید:', chooseCommandKeyboard(ctx.userSession))
     // ctx.scene.state.messages = messages
   })
@@ -181,6 +180,13 @@ const firstScene = new Scene('choose_command')
     // cuase command had become like:  روشن شو ✅
     command = ctx.message.text.split(' ').filter(word => word != '✅').join(' ');
     console.log("Entered: ", command)
+
+    if (command === 'متفرقه') {
+      ctx.reply(`
+      برای این دستور هر کلمه دلخواهی را به غیر از کلمات لیست بالا می‌توانید ضبط و ارسال کنید.
+      از این دستورات برای شناسایی کلمات بی اهمیت و یا نویزی استفاده می‌شوند.
+      `);
+    }
     
     // Ask for another command if input text not in commands
     if (!commands.includes(command)) {
@@ -328,7 +334,7 @@ const secondScene = new Scene('get_voices')
       //Cause we added once on line above on enter
       --ctx.userSession.commandStatuses[ctx.userSession.choosenCommand].voiceCount;
       ctx.userSession.remainCommands--;
-      ctx.reply(`command ${ctx.userSession.choosenCommand} spoke ${ctx.userSession.commandStatuses[ctx.userSession.choosenCommand].voiceCount} times`);
+      ctx.reply(`دستور ${ctx.userSession.choosenCommand}، ${persianJs((ctx.userSession.commandStatuses[ctx.userSession.choosenCommand].voiceCount).toString()).digitsToWords().toString()} مرتبه ارسال شد.`);
       ctx.userSession.lastStage = 'choose_command';
       ctx.scene.enter('choose_command');
   })
@@ -513,6 +519,7 @@ bot.on(['text', 'voice'], (ctx) => {
       var LS = ctx.userSession.lastStage;
       var CC = ctx.userSession.choosenCommand;
       console.log(LS, CC);
+      console.log("Times =====", ctx.userSession.commandStatuses[CC].voiceCount)
       if (LS && CC) ctx.userSession.commandStatuses[CC].voiceCount--;
       ctx.scene.enter(LS)
     }
