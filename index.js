@@ -121,7 +121,7 @@ const firstScene = new Scene('choose_command')
     // [*not used now*] for storing messages to be cleared using `sceneCleaner`
     // const messages = []
 
-    // Finnished commands. Say thanks and so (TODO: Change the system!)
+    // Finnished commands. Say thanks and so
     if (ctx.userSession.commandCounter == 3) {
       return messages.push(await ctx.reply(`
         از شما واقعا ممنونیم که تمامی دستورات را انجام دادید.
@@ -178,8 +178,8 @@ const firstScene = new Scene('choose_command')
     }
   })
   .on('text', async (ctx)=>{
-    // cuase command had become (روشن (0 از 3))
-    command = ctx.message.text;
+    // cuase command had become like:  روشن شو ✅
+    command = ctx.message.text.split(' ').filter(word => word != '✅').join(' ');
     console.log("Entered: ", command)
     
     // Ask for another command if input text not in commands
@@ -197,9 +197,14 @@ const firstScene = new Scene('choose_command')
         ctx.scene.enter('get_voices');
         ctx.userSession.lastStage = 'get_voices';
       }
-      // otherwise Error to choose another command
+      // otherwise Error to choose another command (TODO: Fix this part)
       else {
-        ctx.reply('ادامه می‌دهید یا !!! یکی دیگر از دستورات را انتخاب کنید:')
+        ctx.reply(`
+          first scene. comamnd spoken more than 3 times!
+        `,
+        Markup.inlineKeyboard([
+          Markup.callbackButton('شروع مجدد', 'reStart') // Adds a glassy button to start the process
+        ]).extra());        
       }
     }
     catch(err){
@@ -222,7 +227,7 @@ const firstScene = new Scene('choose_command')
 // SECOND SCENE : PRONOUNCE THE COMMAND
 const secondScene = new Scene('get_voices')
   .enter((ctx) => {
-    
+    // Set last stage on user Session
     ctx.userSession.lastStage = 'get_voices';
 
     // [*not used now*] for storing messages to be cleared using `sceneCleaner`
@@ -230,19 +235,31 @@ const secondScene = new Scene('get_voices')
     
     // If the command is pronounced 3 times go back to scene one (choosing commands)
     var voiceCount = ++ctx.userSession.commandStatuses[ctx.userSession.choosenCommand].voiceCount;
-    if (voiceCount > 3) {
-      const process = fork('./downloadVoices.js');
-      process.send({ userId: getSessionKey(ctx).replace(':', '-'), voiceId: F2F.simplef2f(ctx.userSession.choosenCommand)});
+    if (voiceCount > 3) { // TODO: use .done property
+      // User has spoken the command at least 3 times so setting .done to true
+      ctx.userSession.commandStatuses[ctx.userSession.choosenCommand].done = true;
+
+      // // Downlaodin voice files 
+      // const process = fork('./downloadVoices.js');
+      // process.send({ userId: getSessionKey(ctx).replace(':', '-'), voiceId: F2F.simplef2f(ctx.userSession.choosenCommand)});
       // process.on('message', (message) => {
         //   log.info(`${message.downloadedFile} downloaded`);
       // });
-      
+
+      ctx.reply(`
+      مرتبه ${persianJs((voiceCount).toString()).digitsToWords().toString()}
+      صدای خود را ضبط کرده و ارسال کنید:
+      `,
+      Markup.inlineKeyboard([
+        Markup.callbackButton('انتخاب دستور دیگر', 'change_command') // Adds a glassy button to start the bot
+      ]).extra());
+
       // Cause we added once on line above
-      --ctx.userSession.commandStatuses[ctx.userSession.choosenCommand].voiceCount;
-      ctx.userSession.remainCommands--;
-      ctx.reply("More than 3 times");
-      ctx.userSession.lastStage = 'choose_command';
-      ctx.scene.enter('choose_command');
+      // --ctx.userSession.commandStatuses[ctx.userSession.choosenCommand].voiceCount;
+      // ctx.userSession.remainCommands--;
+      // ctx.reply("More than 3 times");
+      // ctx.userSession.lastStage = 'choose_command';
+      // ctx.scene.enter('choose_command');
     }
     else{
       // Ask user to pronounce the command
@@ -272,7 +289,7 @@ const secondScene = new Scene('get_voices')
   .on('voice', (ctx)=>{
     // Thank the user
     ctx.reply("👌");
-    
+    // TODO: dont remove voice files on speaking comamdns again
     // Take voice file url to be download
     userId = getSessionKey(ctx).replace(':', '-');
     fileAddr = `./voices/${userId}/${F2F.simplef2f(ctx.userSession.choosenCommand)}/urls.txt`;
@@ -287,6 +304,24 @@ const secondScene = new Scene('get_voices')
   })
   // if user tryed to type something in this scene Error
   .on('text', (ctx)=>ctx.reply("لطفا تنها دستور مورد نظر را با صدای خود ضبط کرده و ارسال کنید."))
+  // On change_command action (user spoke the command at least 3 times and wants to choose another command)
+  .action('change_command', (ctx, next) => {
+      // Downlaodin voice files 
+      const process = fork('./downloadVoices.js');
+      process.send({ userId: getSessionKey(ctx).replace(':', '-'),
+                    voiceId: F2F.simplef2f(ctx.userSession.choosenCommand)
+                  });
+      // process.on('message', (message) => {
+      //     log.info(`${message.downloadedFile} downloaded`);
+      // });
+      
+      //Cause we added once on line above on enter
+      --ctx.userSession.commandStatuses[ctx.userSession.choosenCommand].voiceCount;
+      ctx.userSession.remainCommands--;
+      ctx.reply(`command ${ctx.userSession.choosenCommand} spoke ${ctx.userSession.commandStatuses[ctx.userSession.choosenCommand].voiceCount} times`);
+      ctx.userSession.lastStage = 'choose_command';
+      ctx.scene.enter('choose_command');
+  })
   // What to happen when leaving this scene (including switching between scenes)
   .leave(async (ctx) => {
     console.log("Leaving 2nd scene");
