@@ -20,6 +20,7 @@
     "download-file": "^0.1.5",
     "express": "^4.16.4",
     "f2f": "^0.1.0",
+    "finalhandler": "^1.1.1",
     "persianjs": "^0.4.0",
     "rimraf": "^2.6.2",
     "serve-index": "^1.9.1",

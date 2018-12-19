@@ -126,7 +126,7 @@ const firstScene = new Scene('choose_command')
       return messages.push(await ctx.reply(`
         از شما واقعا ممنونیم که تمامی دستورات را انجام دادید.
         می‌توانید دستورات مربوط به خودتون رو در آدرس زیر مشاهده کنید:
-        http://dataset.class.vision/pvcc/voices/${getSessionKey(ctx).replace(':', '-')}
+        http://dataset.class.vision:3030/voices/${getSessionKey(ctx).replace(':', '-')}
       `));  
     }
 
@@ -157,7 +157,7 @@ const firstScene = new Scene('choose_command')
   .command('myvoices', ctx => {
     ctx.reply(`
       شما می‌توانید ویس‌های مربوطه خود را در آدرس زیر مشاهده کنید:
-      http://dataset.class.vision/pvcc/voices/${getSessionKey(ctx).replace(':', '-')}
+      http://dataset.class.vision:3030/voices/${getSessionKey(ctx).replace(':', '-')}
     `);
   })
   // Calling /start on first scene (Do exactly as Bot.start)
@@ -398,7 +398,7 @@ function botInitilizer (ctx) {
 
   // Greetings
   ctx.reply(`
-  سلام ${userSession.userName /*||*/ + userSession.fullName}.
+  سلام ${userSession.userName || + userSession.fullName}.
   ممنونیم که وقت خودتون رو در اختیار ما گذاشته و به جمع‌آوری دیتاستی از دستورات فارسی کمک می‌کنید.
   در ادامه پس از انتخاب گزینه شروع، در هر مرتبه یک دستور به شما نمایش داده می‌شود و از شما خواسته می‌شود که صدای خود در حین خواندن آن دستور را سه مرتبه ضبط کرده و ارسال کنید.
   توجه کنید که اطلاعات نامعتبر پس از بررسی حذف خواهند شد.
@@ -480,7 +480,7 @@ bot.command('credit', ctx => {
 bot.command('myvoices', ctx => {
   ctx.reply(`
     شما می‌توانید ویس‌های مربوطه خود را در آدرس زیر مشاهده کنید:
-    http://dataset.class.vision/pvcc/voices/${getSessionKey(ctx).replace(':', '-')}
+    http://dataset.class.vision:3030/voices/${getSessionKey(ctx).replace(':', '-')}
   `);
 });
 

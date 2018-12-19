@@ -1,32 +1,39 @@
 var express = require('express'),
-bodyParser = require('body-parser');
+    bodyParser = require('body-parser'),
+    path = require('path'),
+    finalhandler = require('finalhandler');
 
-
+// Local file indexer
 var serveIndex = require('serve-index')
 
+// Initializing express app
 var app = express();
 
-var path = require('path');
 
-
-// for parsing application/json
+// For parsing application/json
 app.use(bodyParser.json()); 
 
-// for parsing application/xwww-
+// For parsing application/xwww-
 app.use(bodyParser.urlencoded({ extended: true })); 
-app.use('/files', express.static(path.join(__dirname + '/files/')), serveIndex(path.join(__dirname + '/files/'), {'icons': true}))
 
-app.get('/things/:name/:id', function(req, res) {
-    res.send('id: ' + req.params.id + ' and name: ' + req.params.name);
+
+app.use('/voices/:userId', function (req, res) {
+        folder = req.params.userId;
+        addr = path.join(`${__dirname}/voices/${folder}`);
+        done = finalhandler(req, res);
+        express.static(addr)(req, res, function onNext() {
+            console.log(addr);
+            serveIndex(addr, {'icons': true})(req, res, done)
+        })
 });
 
-app.post('/post', function (req, res) {
-    res.send({name: req.body.name})
-})
+app.use('/voicefiles', express.static(path.join(__dirname + '/voices/')), serveIndex(path.join(__dirname + '/voices/'), {'icons': true}));
 
+
+// For all pathes with no handler
 app.get('*', function(req, res){
     res.send('Sorry, this is an invalid URL.');
 });
 
-
-app.listen(3000);
+// Start the server
+app.listen(3030);
