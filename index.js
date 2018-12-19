@@ -194,24 +194,34 @@ const firstScene = new Scene('choose_command')
     try{
       console.log(ctx.userSession.commandStatuses[command]);
       if (ctx.userSession.commandStatuses[command].voiceCount < 3) {
-        ctx.scene.enter('get_voices');
         ctx.userSession.lastStage = 'get_voices';
+        ctx.scene.enter('get_voices');
       }
       // otherwise Error to choose another command (TODO: Fix this part)
       else {
         ctx.reply(`
-          first scene. comamnd spoken more than 3 times!
+        شما این دستور را به تعداد کافی ارسال کرده اید.
+        اگر می‌خواهید بازهم آن را ضبز کنید روی دکمه زیر کلیک کنید،
+        مگرنه یک دستور دیگر انتخاب کنید.
         `,
         Markup.inlineKeyboard([
-          Markup.callbackButton('شروع مجدد', 'reStart') // Adds a glassy button to start the process
-        ]).extra());        
+          Markup.callbackButton('ارسال بیشتر', 'add_more_voice')
+        ]).extra());
       }
     }
     catch(err){
       console.log(err);
+      // Just to make sure no Error is occurred
+      if (! 'voiceCount' in ctx.userSession.commandStatuses[command])
+        ctx.userSession.commandStatuses[command].voiceCount = 0;
       ctx.scene.reenter();
     }
 
+  })
+  // On add_more_voice action (user wants to spoke the command again)
+  .action('add_more_voice', (ctx, next) => {
+    ctx.userSession.lastStage = 'get_voices';
+    ctx.scene.enter('get_voices');
   })
   // if user tryed to send a recoreded voice in this scene Error
   .on('voice', (ctx)=>ctx.reply("لطفا اول یک دستور را انتخاب کنید"))
