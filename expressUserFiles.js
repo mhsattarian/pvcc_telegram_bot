@@ -18,13 +18,13 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 
 app.use('/voices/:userId', function (req, res) {
-        folder = req.params.userId;
-        addr = path.join(`${__dirname}/voices/${folder}`);
-        done = finalhandler(req, res);
-        express.static(addr)(req, res, function onNext() {
-            console.log(addr);
-            serveIndex(addr, {'icons': true})(req, res, done)
-        })
+    folder = req.params.userId;
+    addr = path.join(`${__dirname}/voices/${folder}`);
+    done = finalhandler(req, res);
+    express.static(addr)(req, res, function onNext() {
+        console.log(addr);
+        serveIndex(addr, {'icons': true})(req, res, done)
+    });
 });
 
 app.use('/voicefiles', express.static(path.join(__dirname + '/voices/')), serveIndex(path.join(__dirname + '/voices/'), {'icons': true}));
