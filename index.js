@@ -463,20 +463,6 @@ bot.command('session', ctx => {
   ctx.reply('UserSession: \n' + JSON.stringify(ctx.userSession));
 });
 
-// TODO: make cancel button work
-
-// 2. When the شروع glassy button is pressed
-// bot.hears('[لغو]', ctx => {
-//   // Remove the keyboard if exist!
-//   ctx.reply(undefined,
-//     Extra.markup(Markup.removeKeyboard()),
-//   );
-// });
-
-
-
-
-
 // info command - shows information about the bot
 bot.command('info', ctx => {
   ctx.reply(`
@@ -485,8 +471,6 @@ bot.command('info', ctx => {
   این ربات برای پروژه درس کارشناسی در دانشگاه شهید رجایی توسعه داده‌شده و مورد استفاده قرار خواهد گرفت. البته دیتاست جمع‌آوری شده نیز به صورت عمومی در دسترس خواهد بود که می‌توانید پس از اتمام دستورات و یا با استفاده از کامند /myvoices آدرسی که فایل صوتی دستورات مربوط به شما در آن ذخیره می‌شود را مشاهده کنید.
   `);
 });
-
-// TODO: use .done for commands
 
 // credit command - shows developers credit
 bot.command('credit', ctx => {
@@ -519,8 +503,7 @@ bot.on(['text', 'voice'], (ctx) => {
       var LS = ctx.userSession.lastStage;
       var CC = ctx.userSession.choosenCommand;
       console.log(LS, CC);
-      console.log("Times =====", ctx.userSession.commandStatuses[CC].voiceCount)
-      if (LS && CC) ctx.userSession.commandStatuses[CC].voiceCount--;
+      // if (LS && CC) ctx.userSession.commandStatuses[CC].voiceCount--;
       ctx.scene.enter(LS)
     }
     catch (err){
