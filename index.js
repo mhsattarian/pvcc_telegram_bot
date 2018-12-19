@@ -21,13 +21,6 @@
 // uses for telegram bot api token
 require('dotenv').config();
 
-// Adding the Logger
-const winston = require('winston');
-const { combine, timestamp, label, prettyPrint } = winston.format;
-var logger;
-handleLogger();
-
-
 const Telegraf = require('telegraf'), // Telegram Bot API wrapper
   Extra = require('telegraf/extra'),
   Markup = require('telegraf/markup'),
@@ -51,6 +44,12 @@ const http = require('http'),
 
 
 /** -------------------- Initilizations --------------- **/
+
+// Adding the Logger
+const winston = require('winston');
+const { combine, timestamp, label, prettyPrint } = winston.format;
+var logger;
+handleLogger();
 
 // Initilizes and connects to Bot using the Token
 const bot = new Telegraf(process.env.TG_TOKEN);
@@ -480,6 +479,15 @@ bot.on(['text', 'voice'], (ctx) => {
 
 
 function handleLogger() {
+
+  // Create log folder if dont exist
+  if (!fs.existsSync('logs')) {
+    fs.mkdirSync('./logs');    
+    fs.writeFileSync(`./logs/combined.log`, '');
+    fs.writeFileSync(`./logs/error.log`, '');
+  }
+
+  // Initialize logger (Winston)
   logger = winston.createLogger({
     level: 'info',
     format: combine(
