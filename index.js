@@ -203,7 +203,7 @@ const firstScene = new Scene('choose_command')
         ctx.userSession.lastStage = 'get_voices';
         ctx.scene.enter('get_voices');
       }
-      // otherwise Error to choose another command (TODO: Fix this part)
+      // otherwise Error to choose another command
       else {
         ctx.reply(`
         شما این دستور را به تعداد کافی ارسال کرده اید.
@@ -251,7 +251,7 @@ const secondScene = new Scene('get_voices')
     
     // If the command is pronounced 3 times go back to scene one (choosing commands)
     var voiceCount = ++ctx.userSession.commandStatuses[ctx.userSession.choosenCommand].voiceCount;
-    if (voiceCount > 3) { // TODO: use .done property
+    if (voiceCount > 3) {
       // User has spoken the command at least 3 times so setting .done to true
       ctx.userSession.commandStatuses[ctx.userSession.choosenCommand].done = true;
 
@@ -305,7 +305,6 @@ const secondScene = new Scene('get_voices')
   .on('voice', (ctx)=>{
     // Thank the user
     ctx.reply("👌");
-    // TODO: dont remove voice files on speaking comamdns again
     // Take voice file url to be download
     userId = getSessionKey(ctx).replace(':', '-');
     fileAddr = `./voices/${userId}/${F2F.simplef2f(ctx.userSession.choosenCommand)}/urls.txt`;
@@ -377,8 +376,6 @@ bot.command('help', ctx => {
   پس از اتمام دستورات و یا با استفاده از کامند /myvoices می‌توانید آدرسی که فایل صوتی دستورات مربوط به شما در آن ذخیره می‌شود را مشاهده کنید.
   `);
 });
-
-// TODO: it old user, and wants to restart, ask for clearing data or not
 
 function botInitilizer (ctx) {
   // choose active user's session from the session object

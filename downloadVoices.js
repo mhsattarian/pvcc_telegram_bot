@@ -29,15 +29,10 @@ process.on('message', async (message) => {
                     if (err) throw err;
                 });
             }
-            // console.log('\n', urls);
-
+            
             // send response to master process
             // process.send({ downloadedFile: url.slice(url.lastIndexOf('/')) });
         });
     });
-
-
-
-    
 });
   
