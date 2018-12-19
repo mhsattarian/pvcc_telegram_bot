@@ -81,7 +81,7 @@ const commands = [
   'چپ',
   'راست',
   'کی ساختت؟',
-  'متفرقه', // TODO: Add the ability to lable the other commands
+  'متفرقه',
 ];
 
 // Initilize the Finglish to Farsi Class
@@ -207,7 +207,7 @@ const firstScene = new Scene('choose_command')
       else {
         ctx.reply(`
         شما این دستور را به تعداد کافی ارسال کرده اید.
-        اگر می‌خواهید بازهم آن را ضبز کنید روی دکمه زیر کلیک کنید،
+        اگر می‌خواهید بازهم آن را ضبط کنید روی دکمه زیر کلیک کنید،
         مگرنه یک دستور دیگر انتخاب کنید.
         `,
         Markup.inlineKeyboard([
