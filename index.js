@@ -232,7 +232,7 @@ const secondScene = new Scene('get_voices')
     var voiceCount = ++ctx.userSession.commandStatuses[ctx.userSession.choosenCommand].voiceCount;
     if (voiceCount > 3) {
       const process = fork('./downloadVoices.js');
-      process.send({ userId: getSessionKey(ctx).replace(':', '-'), voiceId: commands.indexOf(ctx.userSession.choosenCommand)});
+      process.send({ userId: getSessionKey(ctx).replace(':', '-'), voiceId: F2F.simplef2f(ctx.userSession.choosenCommand)});
       // process.on('message', (message) => {
         //   log.info(`${message.downloadedFile} downloaded`);
       // });
@@ -255,7 +255,7 @@ const secondScene = new Scene('get_voices')
     // We want to store the urls to a file called urls.txt 
     // on a directory named based on user ids
     userId = getSessionKey(ctx).replace(':', '-');
-    addr = `./voices/${userId}/${commands.indexOf(ctx.userSession.choosenCommand)}`;
+    addr = `./voices/${userId}/${F2F.simplef2f(ctx.userSession.choosenCommand)}`;
     shell.mkdir('-p', addr);
 
     // If urls.txt file not exist create it
@@ -275,7 +275,7 @@ const secondScene = new Scene('get_voices')
     
     // Take voice file url to be download
     userId = getSessionKey(ctx).replace(':', '-');
-    fileAddr = `./voices/${userId}/${commands.indexOf(ctx.userSession.choosenCommand)}/urls.txt`;
+    fileAddr = `./voices/${userId}/${F2F.simplef2f(ctx.userSession.choosenCommand)}/urls.txt`;
     url = bot.telegram.getFileLink(ctx.message.voice.file_id).then(url=>{
       fs.appendFile(fileAddr, url + '\n', function (err) {
         if (err) throw err;
