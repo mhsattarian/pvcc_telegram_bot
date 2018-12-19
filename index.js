@@ -51,6 +51,9 @@ const { combine, timestamp, label, prettyPrint } = winston.format;
 var logger;
 handleLogger();
 
+// Start voice files indexing script
+const expressUserFiles = fork('./expressUserFiles.js');
+
 // Initilizes and connects to Bot using the Token
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
@@ -255,13 +258,6 @@ const secondScene = new Scene('get_voices')
       // User has spoken the command at least 3 times so setting .done to true
       ctx.userSession.commandStatuses[ctx.userSession.choosenCommand].done = true;
 
-      // // Downlaodin voice files 
-      // const process = fork('./downloadVoices.js');
-      // process.send({ userId: getSessionKey(ctx).replace(':', '-'), voiceId: F2F.simplef2f(ctx.userSession.choosenCommand)});
-      // process.on('message', (message) => {
-        //   log.info(`${message.downloadedFile} downloaded`);
-      // });
-
       ctx.reply(`
       مرتبه ${persianJs((voiceCount).toString()).digitsToWords().toString()}
       صدای خود را ضبط کرده و ارسال کنید:
@@ -269,13 +265,6 @@ const secondScene = new Scene('get_voices')
       Markup.inlineKeyboard([
         Markup.callbackButton('انتخاب دستور دیگر', 'change_command') // Adds a glassy button to start the bot
       ]).extra());
-
-      // Cause we added once on line above
-      // --ctx.userSession.commandStatuses[ctx.userSession.choosenCommand].voiceCount;
-      // ctx.userSession.remainCommands--;
-      // ctx.reply("More than 3 times");
-      // ctx.userSession.lastStage = 'choose_command';
-      // ctx.scene.enter('choose_command');
     }
     else{
       // Ask user to pronounce the command
@@ -326,9 +315,12 @@ const secondScene = new Scene('get_voices')
       process.send({ userId: getSessionKey(ctx).replace(':', '-'),
                     voiceId: F2F.simplef2f(ctx.userSession.choosenCommand)
                   });
-      // process.on('message', (message) => {
-      //     log.info(`${message.downloadedFile} downloaded`);
-      // });
+      process.on('exit', (message) => {
+          console.log("---- Child exited");
+      });
+      process.on('stop', (message) => {
+        console.log("---- Child stoped");
+      });
       
       //Cause we added once on line above on enter
       --ctx.userSession.commandStatuses[ctx.userSession.choosenCommand].voiceCount;
