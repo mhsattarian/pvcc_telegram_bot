@@ -314,13 +314,7 @@ const secondScene = new Scene('get_voices')
       const process = fork('./downloadVoices.js');
       process.send({ userId: getSessionKey(ctx).replace(':', '-'),
                     voiceId: F2F.simplef2f(ctx.userSession.choosenCommand)
-                  });
-      process.on('exit', (message) => {
-          console.log("---- Child exited");
-      });
-      process.on('stop', (message) => {
-        console.log("---- Child stoped");
-      });
+              });
       
       //Cause we added once on line above on enter
       --ctx.userSession.commandStatuses[ctx.userSession.choosenCommand].voiceCount;
