@@ -253,7 +253,12 @@ const secondScene = new Scene('get_voices')
     // const messages = []
     
     // If the command is pronounced 3 times go back to scene one (choosing commands)
-    var voiceCount = ++ctx.userSession.commandStatuses[ctx.userSession.choosenCommand].voiceCount;
+    var voiceCount = ctx.userSession.commandStatuses[ctx.userSession.choosenCommand].voiceCount;
+    // if command's voiceCount is 0 make it 1. cause the counter wont start at 0
+    if (voiceCount == 0) {
+      ++ctx.userSession.commandStatuses[ctx.userSession.choosenCommand].voiceCount;
+      voiceCount++;
+    }
     if (voiceCount > 3) {
       // User has spoken the command at least 3 times so setting .done to true
       ctx.userSession.commandStatuses[ctx.userSession.choosenCommand].done = true;
@@ -292,6 +297,8 @@ const secondScene = new Scene('get_voices')
     // ctx.scene.state.messages = messages
   })
   .on('voice', (ctx)=>{
+    // Add command's voiceCount
+    ++ctx.userSession.commandStatuses[ctx.userSession.choosenCommand].voiceCount;
     // Thank the user
     ctx.reply("👌");
     // Take voice file url to be download
