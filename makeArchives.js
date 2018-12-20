@@ -1,5 +1,4 @@
 const fs = require('fs'),
-    { COPYFILE_EXCL } = fs.constants,
     archiver = require('archiver');
  
 // Directory to store voice files
