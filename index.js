@@ -503,7 +503,7 @@ bot.on(['text', 'voice'], (ctx) => {
 
 function handleLogger() {
 
-  // Create log folder if dont exist
+  // Create log directory if dont exist
   if (!fs.existsSync('logs')) {
     fs.mkdirSync('./logs');    
     fs.writeFileSync(`./logs/combined.log`, '');

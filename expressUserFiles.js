@@ -18,8 +18,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 
 app.use('/voices/:userId', function (req, res) {
-    folder = req.params.userId;
-    addr = path.join(`${__dirname}/voices/${folder}`);
+    dir = req.params.userId;
+    addr = path.join(`${__dirname}/voices/${dir}`);
     done = finalhandler(req, res);
     express.static(addr)(req, res, function onNext() {
         console.log(addr);
