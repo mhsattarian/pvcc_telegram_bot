@@ -10,9 +10,7 @@ process.on('message', async (message) => {
 
     // Cause wav files may exist
     wavFileName = await files.filter(file => nameExt(file)[1] == 'wav').map(file => nameExt(file)[0]);
-    console.log('wavFileName', wavFileName);
     filesToConvert = files.filter(file => !wavFileName.includes(nameExt(file)[0]))
-    console.log('filesToConvert' , filesToConvert)
     
     
     filesToConvert.forEach(file => {

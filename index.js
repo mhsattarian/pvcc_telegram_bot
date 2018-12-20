@@ -481,7 +481,7 @@ bot.on(['text', 'voice'], (ctx) => {
   ببخشید فراموش کردم کجا بودیم! دوباره امتحان کنید:
   `);
   // Try to go to last stage
-  if ('lastStage' in ctx.userSession) 
+  if ('lastStage' in ctx.userSession) {
     try {
       var LS = ctx.userSession.lastStage;
       var CC = ctx.userSession.choosenCommand;
@@ -493,6 +493,11 @@ bot.on(['text', 'voice'], (ctx) => {
       console.log(err);
       ctx.scene.enter('choose_command')
     }
+  }
+  else {
+    // The session file has been removed so user should be initialized
+    botInitilizer(ctx); 
+  }
 })
 
 
