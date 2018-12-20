@@ -324,7 +324,7 @@ const secondScene = new Scene('get_voices')
       ctx.scene.enter('choose_command');
   })
   // What to happen when leaving this scene (including switching between scenes)
-  .leave(async (ctx) => {
+  .leave(async (ctx) => { // TODO: Add the voice counter here!
     console.log("Leaving 2nd scene");
   });
 
@@ -491,7 +491,7 @@ bot.on(['text', 'voice'], (ctx) => {
     }
     catch (err){
       console.log(err);
-      ctx.scene.enter('choose_command')
+      botInitilizer(ctx); 
     }
   }
   else {
