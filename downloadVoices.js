@@ -15,9 +15,11 @@ process.on('message', async (message) => {
     urls.forEach(url => {
         if (url.length < 10) return;
 
+        var name = url.split('/').slice(-1)[0].replace('file', message.voiceId)
+
         var downloadOptions = {
             directory: addr,
-            filename: url.slice(url.lastIndexOf('/'))
+            filename: name
         }
          
         download(url, downloadOptions, function(err){
