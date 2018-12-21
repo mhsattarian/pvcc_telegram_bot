@@ -163,6 +163,12 @@ const firstScene = new Scene('choose_command')
       http://dataset.class.vision/pvcc/voices/${getSessionKey(ctx).replace(':', '-')}
     `);
   })
+  .command('allvoices', ctx => {
+    ctx.reply(`
+      برای دریافت تمامی ویس‌ها از لینک زیر استفاده کنید:
+      http://dataset.class.vision/pvcc/archived/voices.zip
+    `);
+  })
   // Calling /start on first scene (Do exactly as Bot.start)
   .start((ctx) => {
     // Chack if User has already initilized the bot and has account in sessions
@@ -478,6 +484,14 @@ bot.command('myvoices', ctx => {
   ctx.reply(`
     شما می‌توانید ویس‌های مربوطه خود را در آدرس زیر مشاهده کنید:
     http://dataset.class.vision/pvcc/voices/${getSessionKey(ctx).replace(':', '-')}
+  `);
+});
+
+// allvoices command - shows link to download all voices
+bot.command('allvoices', ctx => {
+  ctx.reply(`
+    برای دریافت تمامی ویس‌ها از لینک زیر استفاده کنید:
+    http://dataset.class.vision/pvcc/archived/voices.zip
   `);
 });
 
