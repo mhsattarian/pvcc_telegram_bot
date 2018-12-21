@@ -2,6 +2,14 @@
 const fs = require('fs'),
     archiver = require('archiver');
 
+// Last time the zip is created is stored at updateTime.txt
+// Check for updateTime.txt
+if (!fs.existsSync('./archived/updateTime.txt')) {
+  // If not existing, create with time of Dec 21th 2018 (the day this coide is written!)
+  fs.writeFileSync(`./archived/updateTime.txt`, '1545341365468');
+}
+
+// Then is the last time the zip file created. read from updateTime.txt
 then = parseInt(fs.readFileSync('./archived/updateTime.txt', { encoding: 'utf-8'}));
 var now = new Date();
 var hourseSpent = (now - then) / (1000 * 60 * 60)
