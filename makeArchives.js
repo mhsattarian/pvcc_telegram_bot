@@ -5,6 +5,8 @@ const fs = require('fs'),
 // Last time the zip is created is stored at updateTime.txt
 // Check for updateTime.txt
 if (!fs.existsSync('./archived/updateTime.txt')) {
+  fs.mkdirSync('./archived');    
+  fs.mkdirSync('./archived/voices');    
   // If not existing, create with time of Dec 21th 2018 (the day this coide is written!)
   fs.writeFileSync(`./archived/updateTime.txt`, '1545341365468');
 }
