@@ -171,7 +171,7 @@ const firstScene = new Scene('choose_command')
     const archiveScript = fork('./makeArchives.js');
     archiveScript.send({ force: false});
     
-    ArchiveScript.on('message', (msg) => {
+    archiveScript.on('message', (msg) => {
       if (msg.status === 'ok') {
         ctx.reply(`
         برای دریافت تمامی ویس‌ها از لینک زیر استفاده کنید:
