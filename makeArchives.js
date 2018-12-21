@@ -1,6 +1,7 @@
 
 const fs = require('fs'),
-    archiver = require('archiver');
+    archiver = require('archiver'),
+    rimraf = require('rimraf');
 
 // Last time the zip is created is stored at updateTime.txt
 // Check for updateTime.txt
@@ -27,9 +28,13 @@ process.on('message', async (message) => {
   }
   else {
     console.log("Zipping again");
-    
-    // Directory to store voice files
+
+    // FIXME: BUG. remove voices folder before donint anything
+    rimraf(`./voices/${getSessionKey(ctx).replace(':', '-')}`, function () {
+      
+      // Directory to store voice files
     const dstDirectory = './archived/voices/';
+    
 
     // Called to create Voice Directories if not exist
     function creatVoiceDirectories (commands) {
@@ -137,5 +142,9 @@ process.on('message', async (message) => {
 
       return [name, extension]
     }
+
+
+
+    }); 
   }
 });
