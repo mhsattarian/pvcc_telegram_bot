@@ -140,9 +140,9 @@ const firstScene = new Scene('choose_command')
   })
   .command('help', ctx => {
     ctx.reply(`
-    نحوه کار ربات بدین صورت است که در هر مرتبه یک دستور به شما نمایش داده می‌شود و از شما خواسته می‌شود که صدای خود در حین خواندن آن دستور را سه مرتبه ضبط کرده و ارسال کنید.
+    نحوه کار ربات بدین صورت است که در هر مرتبه یک دستور (یک عبارت دستوری) به شما نمایش داده می‌شود و از شما خواسته می‌شود که صدای خود در حین خواندن آن دستور را سه مرتبه ضبط کرده و ارسال کنید.
     در حین ضبط یک دستور، یعنی زمانی که هنوز برای بار سوم دستور را نخوانده و ارسال نکرده‌اید از ارسال متن و یا کامند به بات خودداری کنید.
-    پس از اتمام دستورات و یا با استفاده از کامند /myvoices می‌توانید آدرسی که فایل صوتی دستورات مربوط به شما در آن ذخیره می‌شود را مشاهده کنید.
+    پس از اتمام دستورات و یا با استفاده از کامند /myvoices می‌توانید آدرسی که فایل صوتی دستورات مربوط به شما در آن ذخیره می‌شود را مشاهده کنید. همچنین می‌توانید با استفاده از کامند /allvoices فایل شامل صوت تمامی دستورات را دریافت کنید.
     `);
   })
   .command('info', ctx => {
@@ -165,9 +165,48 @@ const firstScene = new Scene('choose_command')
   })
   .command('allvoices', ctx => {
     ctx.reply(`
-      برای دریافت تمامی ویس‌ها از لینک زیر استفاده کنید:
-      http://dataset.class.vision/pvcc/archived/voices.zip
+    لطفا کمی صبر کنید ...
     `);
+  
+    const archiveScript = fork('./makeArchives.js');
+    archiveScript.send({ force: false});
+    
+    ArchiveScript.on('message', (msg) => {
+      if (msg.status === 'ok') {
+        ctx.reply(`
+        برای دریافت تمامی ویس‌ها از لینک زیر استفاده کنید:
+        http://dataset.class.vision/pvcc/archived/voices.zip
+  
+        ممکن است آخرین فایل‌های صوتی در فایل موجود نباشند. برای بروز رسانی فایل از دکمه زیر استفاده کنید:
+        `,
+        Markup.inlineKeyboard([
+          Markup.callbackButton('فشرده‌سازی دوباره', 'reArchive') // Adds a glassy button to start the process
+        ]).extra()); 
+      }
+      else {
+        ctx.reply(`
+        مشکلی به وجود آمده. لطفا کمی دیگر دوباره امتحان کنید.
+        `);
+      }
+    });
+  })
+  .action('reArchive', (ctx, next) => {
+    const reArchiveScript = fork('./makeArchives.js');
+    reArchiveScript.send({ force: true});
+    
+    reArchiveScript.on('message', (msg) => {
+      if (msg.status === 'ok') {
+        ctx.reply(`
+        آخرین تغییرات در فایل ذخیره شد:
+        http://dataset.class.vision/pvcc/archived/voices.zip
+        `);
+      }
+      else {
+        ctx.reply(`
+        مشکلی به وجود آمده. لطفا کمی دیگر دوباره امتحان کنید.
+        `);
+      }
+    });
   })
   // Calling /start on first scene (Do exactly as Bot.start)
   .start((ctx) => {
@@ -374,9 +413,9 @@ getSessionKey = (ctx) => {
 // help command - shows usage instructions
 bot.command('help', ctx => {
   ctx.reply(`
-  نحوه کار ربات بدین صورت است که در هر مرتبه یک دستور به شما نمایش داده می‌شود و از شما خواسته می‌شود که صدای خود در حین خواندن آن دستور را سه مرتبه ضبط کرده و ارسال کنید.
+  نحوه کار ربات بدین صورت است که در هر مرتبه یک دستور (یک عبارت دستوری) به شما نمایش داده می‌شود و از شما خواسته می‌شود که صدای خود در حین خواندن آن دستور را سه مرتبه ضبط کرده و ارسال کنید.
   در حین ضبط یک دستور، یعنی زمانی که هنوز برای بار سوم دستور را نخوانده و ارسال نکرده‌اید از ارسال متن و یا کامند به بات خودداری کنید.
-  پس از اتمام دستورات و یا با استفاده از کامند /myvoices می‌توانید آدرسی که فایل صوتی دستورات مربوط به شما در آن ذخیره می‌شود را مشاهده کنید.
+  پس از اتمام دستورات و یا با استفاده از کامند /myvoices می‌توانید آدرسی که فایل صوتی دستورات مربوط به شما در آن ذخیره می‌شود را مشاهده کنید. همچنین می‌توانید با استفاده از کامند /allvoices فایل شامل صوت تمامی دستورات را دریافت کنید.
   `);
 });
 
@@ -401,9 +440,9 @@ function botInitilizer (ctx) {
 
   // Greetings
   ctx.reply(`
-  سلام ${userSession.userName || + userSession.fullName}.
-  ممنونیم که وقت خودتون رو در اختیار ما گذاشته و به جمع‌آوری دیتاستی از دستورات فارسی کمک می‌کنید.
-  در ادامه پس از انتخاب گزینه شروع، در هر مرتبه یک دستور به شما نمایش داده می‌شود و از شما خواسته می‌شود که صدای خود در حین خواندن آن دستور را سه مرتبه ضبط کرده و ارسال کنید.
+  سلام ${userSession.userName || '' + userSession.fullName || ''}، ممنونیم که وقت خودتون رو در اختیار ما گذاشته و به جمع‌آوری دیتاستی از دستورات فارسی کمک می‌کنید.
+  در ادامه پس از انتخاب گزینه شروع، در هر مرتبه یک دستور (یک عبارت دستوری) به شما نمایش داده می‌شود و از شما خواسته می‌شود که صدای خود در حین خواندن آن دستور را سه مرتبه ضبط کرده و ارسال کنید.
+
   توجه کنید که اطلاعات نامعتبر پس از بررسی حذف خواهند شد.
   برای شروع گزینه زیر را انتخاب کنید:
   `,
@@ -438,6 +477,7 @@ bot.action('start_confirmed', (ctx, next) => {
   /info - مشاهده اطلاعات مربوط به ربات
   /credit - مشاهده اطلاعات سازندگان ربات
   /myvoices - مشاهده آدرسی که توسط آن به فایل‌های صوتی خود دسترسی دارید
+  /allvoices - دریافت لینک دانلود کامل دیتاست
   `);
   // enter first scene (Choose command)
   ctx.scene.enter('choose_command')
@@ -490,9 +530,50 @@ bot.command('myvoices', ctx => {
 // allvoices command - shows link to download all voices
 bot.command('allvoices', ctx => {
   ctx.reply(`
-    برای دریافت تمامی ویس‌ها از لینک زیر استفاده کنید:
-    http://dataset.class.vision/pvcc/archived/voices.zip
+  لطفا کمی صبر کنید ...
   `);
+
+  const archiveScript = fork('./makeArchives.js');
+  archiveScript.send({ force: false});
+  
+  archiveScript.on('message', (msg) => {
+    if (msg.status === 'ok') {
+      ctx.reply(`
+      برای دریافت تمامی ویس‌ها از لینک زیر استفاده کنید:
+      http://dataset.class.vision/pvcc/archived/voices.zip
+
+      ممکن است آخرین فایل‌های صوتی در فایل موجود نباشند. برای بروز رسانی فایل از دکمه زیر استفاده کنید:
+      `,
+      Markup.inlineKeyboard([
+        Markup.callbackButton('فشرده‌سازی دوباره', 'reArchive') // Adds a glassy button to start the process
+      ]).extra()); 
+    }
+    else {
+      ctx.reply(`
+      مشکلی به وجود آمده. لطفا کمی دیگر دوباره امتحان کنید.
+      `);
+    }
+  });
+});
+
+// When user chosed to restart the bot
+bot.action('reArchive', (ctx, next) => {
+  const reArchiveScript = fork('./makeArchives.js');
+  reArchiveScript.send({ force: true});
+  
+  reArchiveScript.on('message', (msg) => {
+    if (msg.status === 'ok') {
+      ctx.reply(`
+      آخرین تغییرات در فایل ذخیره شد:
+      http://dataset.class.vision/pvcc/archived/voices.zip
+      `);
+    }
+    else {
+      ctx.reply(`
+      مشکلی به وجود آمده. لطفا کمی دیگر دوباره امتحان کنید.
+      `);
+    }
+  });
 });
 
 
