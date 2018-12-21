@@ -47,7 +47,8 @@ process.on('message', async (message) => {
     users.forEach(user => {
       // Create user directory address
       var _addr = addr + '/' + user;
-      
+      // Check if user is a directory
+      if (fs.lstatSync(_addr).isFile()) return;
       // *Commands*
       commands = fs.readdirSync(_addr);
       // Create command directories on ./archived folder if not exist
@@ -66,7 +67,7 @@ process.on('message', async (message) => {
         });
       });
     });
-
+    
     // create a file to stream archive data to.
     var output = fs.createWriteStream(__dirname + '/archived/voices.zip');
     var archive = archiver('zip', {
