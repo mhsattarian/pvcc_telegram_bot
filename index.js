@@ -85,6 +85,7 @@ const commands = [
   'راست',
   'کی ساختت؟',
   'متفرقه',
+  'پس زمینه',
 ];
 
 // Initilize the Finglish to Farsi Class
@@ -135,6 +136,16 @@ const firstScene = new Scene('choose_command')
 
     // show a keyboard to user to choose between commands
     // messages.push()
+    // if commands has changed!
+    commands.forEach(command => {
+      if (! ctx.userSession.commandStatuses[command]) {
+        ctx.userSession.commandStatuses[command] = {
+          voiceCount: 0,
+          done: false
+        }
+        console.log("--> ", command)
+      }
+    });
     await ctx.reply('یکی از دستورات را انتخاب کنید:', chooseCommandKeyboard(ctx.userSession))
     // ctx.scene.state.messages = messages
   })
@@ -233,6 +244,13 @@ const firstScene = new Scene('choose_command')
       ctx.reply(`
       برای این دستور هر کلمه دلخواهی را به غیر از کلمات لیست بالا می‌توانید ضبط و ارسال کنید.
       از این دستورات برای شناسایی کلمات بی اهمیت و یا نویزی استفاده می‌شوند.
+      `);
+    }
+
+    if (command === 'پس زمینه') {
+      ctx.reply(`
+      برای این دستور صداهای پس زمینه‌ای که ممکن است وجود داشته باشند را ارسال کنید.
+      از این صداها برای تشخیص نویز محیطی استفاده خواهد شد.
       `);
     }
     
