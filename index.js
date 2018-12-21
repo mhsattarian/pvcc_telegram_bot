@@ -314,7 +314,11 @@ const secondScene = new Scene('get_voices')
     ctx.scene.reenter();
   })
   // if user tryed to type something in this scene Error
-  .on('text', (ctx)=>ctx.reply("لطفا تنها دستور مورد نظر را با صدای خود ضبط کرده و ارسال کنید."))
+  .on('text', (ctx)=>ctx.reply(`
+  شما در حال ارسال دستور ${ctx.userSession.choosenCommand} هستید،\
+  اگر می‌خواهید دستور دیگری را انتخاب کنید، ابتدا\
+  لطفا ${persianJs((3 + 1 - ctx.userSession.commandStatuses[ctx.userSession.choosenCommand].voiceCount).toString()).digitsToWords().toString()} مرتبه دیگر همین دستور را ارسال کنید و سپس «انتخاب دستور دیگر» را انتخاب کنید.
+  `))
   // On change_command action (user spoke the command at least 3 times and wants to choose another command)
   .action('change_command', (ctx, next) => {
       // Downlaodin voice files 
