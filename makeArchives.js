@@ -118,6 +118,8 @@ else {
   // 'close', 'end' or 'finish' may be fired right after calling this method so register to them beforehand
   archive.finalize();
 
+  fs.writeFileSync(`./archived/updateTime.txt`, Date.now());
+
 
   function nameExt (fileName) {
     var temp = fileName.split('.');
