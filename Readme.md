@@ -1,5 +1,8 @@
 # Persian Voice Command Collector Telegram Bot
 
+![PVCC Header](/assets/pvcc_header.png)
+
+
 A Telegram Bot to collect Persian commands listed bellow from the user by asking them to pronounce them three times on voice messages. this voices then will be used to train a deep model which is supposed to understand these commands and perform based on what user has asked.
 
 ## commands
