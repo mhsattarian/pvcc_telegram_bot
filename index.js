@@ -129,7 +129,7 @@ const firstScene = new Scene('choose_command')
       return messages.push(await ctx.reply(`
         از شما واقعا ممنونیم که تمامی دستورات را انجام دادید.
         می‌توانید دستورات مربوط به خودتون رو در آدرس زیر مشاهده کنید:
-        http://dataset.class.vision:3030/voices/${getSessionKey(ctx).replace(':', '-')}
+        http://dataset.class.vision/voices/${getSessionKey(ctx).replace(':', '-')}
       `));  
     }
 
@@ -160,7 +160,7 @@ const firstScene = new Scene('choose_command')
   .command('myvoices', ctx => {
     ctx.reply(`
       شما می‌توانید ویس‌های مربوطه خود را در آدرس زیر مشاهده کنید:
-      http://dataset.class.vision:3030/voices/${getSessionKey(ctx).replace(':', '-')}
+      http://dataset.class.vision/voices/${getSessionKey(ctx).replace(':', '-')}
     `);
   })
   // Calling /start on first scene (Do exactly as Bot.start)
@@ -477,9 +477,15 @@ bot.command('credit', ctx => {
 bot.command('myvoices', ctx => {
   ctx.reply(`
     شما می‌توانید ویس‌های مربوطه خود را در آدرس زیر مشاهده کنید:
-    http://dataset.class.vision:3030/voices/${getSessionKey(ctx).replace(':', '-')}
+    http://dataset.class.vision/voices/${getSessionKey(ctx).replace(':', '-')}
   `);
 });
+
+// Continue, for when user's ttl is expired and the keyboard is not available to choose a comamnd
+bot.command('continue', ctx => {
+  //FIXME:
+});
+
 
 // Handle out of stage voices and texts
 // and enter the last stage that user used
