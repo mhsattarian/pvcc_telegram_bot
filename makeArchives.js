@@ -90,6 +90,7 @@ process.on('message', async (message) => {
       output.on('close', function() {
         console.log(archive.pointer() + ' total bytes');
         console.log('archiver has been finalized and the output file descriptor has closed.');
+        process.send({status: 'ok', newZipName});
       });
       
       // This event is fired when the data source is drained no matter what was the data source.
@@ -129,9 +130,8 @@ process.on('message', async (message) => {
       setTimeout(()=> {
         archive.directory(dstDirectory, 'Voices');
         archive.finalize();
-  
+        
         fs.writeFileSync(`./archived/updateTime.txt`, Date.now());
-        process.send({status: 'ok', newZipName});
       }, 0)
       
       // append files from a sub-directory, putting its contents at the root of archive
