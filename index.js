@@ -115,7 +115,12 @@ const sceneCleaner = () => async (ctx) => {
 const chooseCommandKeyboard = (userSession) => Markup.keyboard(commands.map(
   (item)=> `${item}${
       ((userSession.commandStatuses[item].voiceCount || 0) >= 3) ? ' ✅' : ''
-    }`))
+    }`).sort(function(a, b){
+      console.log(a, b);
+      if (a.includes('✅') && !b.includes('✅')) return +1;
+      else if (! a.includes('✅') && b.includes('✅')) return -1;
+      else return 0;
+    }))
   .oneTime().resize().extra()
 
 // 3. FIRST SCENE : CHOSE YOUR COMMAND
@@ -125,27 +130,30 @@ const firstScene = new Scene('choose_command')
     // [*not used now*] for storing messages to be cleared using `sceneCleaner`
     // const messages = []
 
-    // Finnished commands. Say thanks and so
-    if (ctx.userSession.commandCounter == 3) {
-      return messages.push(await ctx.reply(`
-        از شما واقعا ممنونیم که تمامی دستورات را انجام دادید.
-        می‌توانید دستورات مربوط به خودتون رو در آدرس زیر مشاهده کنید:
-        http://dataset.class.vision/pvcc/voices/${getSessionKey(ctx).replace(':', '-')}
-      `));  
-    }
-
     // show a keyboard to user to choose between commands
     // messages.push()
     // if commands has changed!
+    var commandsDoneCounter = 0
     commands.forEach(command => {
-      if (! ctx.userSession.commandStatuses[command]) {
+      var status = ctx.userSession.commandStatuses[command]
+      if (status.done)
+        commandsDoneCounter ++;
+      if (! status) {
         ctx.userSession.commandStatuses[command] = {
           voiceCount: 0,
           done: false
         }
-        console.log("--> ", command)
       }
     });
+    if (commandsDoneCounter == commands.length) {
+      return await ctx.reply(`
+        از شما واقعا ممنونیم که تمامی دستورات را انجام دادید.
+        می‌توانید به دستورات مربوط به خودتون با وارد کردن دستور زیر دسترسی داشته باشید:
+        /myvoices
+        یا لینک دانلود تمامی فایل‌های صوتی را با وارد کردن دستور زیر دریافت کنید:
+        /allvoices
+      `);  
+    }
     await ctx.reply('یکی از دستورات را انتخاب کنید:', chooseCommandKeyboard(ctx.userSession))
     // ctx.scene.state.messages = messages
   })
@@ -309,6 +317,8 @@ const firstScene = new Scene('choose_command')
 // SECOND SCENE : PRONOUNCE THE COMMAND
 const secondScene = new Scene('get_voices')
   .enter((ctx) => {
+    //TODO: add exit keyboard or command
+    
     // Set last stage on user Session
     ctx.userSession.lastStage = 'get_voices';
 
@@ -324,6 +334,8 @@ const secondScene = new Scene('get_voices')
     }
     if (voiceCount > 3) {
       // User has spoken the command at least 3 times so setting .done to true
+      if (ctx.userSession.commandStatuses[ctx.userSession.choosenCommand].done == false)
+        ctx.userSession.commandCounter++;
       ctx.userSession.commandStatuses[ctx.userSession.choosenCommand].done = true;
 
       ctx.reply(`
@@ -392,7 +404,6 @@ const secondScene = new Scene('get_voices')
       
       //Cause we added once on line above on enter
       --ctx.userSession.commandStatuses[ctx.userSession.choosenCommand].voiceCount;
-      ctx.userSession.remainCommands--;
       ctx.reply(`دستور ${ctx.userSession.choosenCommand}، ${persianJs((ctx.userSession.commandStatuses[ctx.userSession.choosenCommand].voiceCount).toString()).digitsToWords().toString()} مرتبه ارسال شد.`);
       ctx.userSession.lastStage = 'choose_command';
       ctx.scene.enter('choose_command');
