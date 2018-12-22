@@ -186,7 +186,7 @@ const firstScene = new Scene('choose_command')
       if (msg.status === 'ok') {
         ctx.reply(`
         برای دریافت تمامی ویس‌ها از لینک زیر استفاده کنید:
-        http://dataset.class.vision/pvcc/archived/voices.zip
+        http://dataset.class.vision/pvcc/archived/${msg.newZipName}
   
         ممکن است آخرین فایل‌های صوتی در فایل موجود نباشند. برای بروز رسانی فایل از دکمه زیر استفاده کنید:
         `,
@@ -209,7 +209,7 @@ const firstScene = new Scene('choose_command')
       if (msg.status === 'ok') {
         ctx.reply(`
         آخرین تغییرات در فایل ذخیره شد:
-        http://dataset.class.vision/pvcc/archived/voices.zip
+        http://dataset.class.vision/pvcc/archived/${msg.newZipName}
         `);
       }
       else {
@@ -558,7 +558,7 @@ bot.command('allvoices', ctx => {
     if (msg.status === 'ok') {
       ctx.reply(`
       برای دریافت تمامی ویس‌ها از لینک زیر استفاده کنید:
-      http://dataset.class.vision/pvcc/archived/voices.zip
+      http://dataset.class.vision/pvcc/archived/${msg.newZipName}
 
       ممکن است آخرین فایل‌های صوتی در فایل موجود نباشند. برای بروز رسانی فایل از دکمه زیر استفاده کنید:
       `,
@@ -583,7 +583,7 @@ bot.action('reArchive', (ctx, next) => {
     if (msg.status === 'ok') {
       ctx.reply(`
       آخرین تغییرات در فایل ذخیره شد:
-      http://dataset.class.vision/pvcc/archived/voices.zip
+      http://dataset.class.vision/pvcc/archived/${msg.newZipName}
       `);
     }
     else {

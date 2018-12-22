@@ -33,6 +33,12 @@ process.on('message', async (message) => {
     const dstDirectory = './archived/voices/';
 
     rimraf(dstDirectory + '*', function () {
+
+      lastVoiceZipFile = fs.readdirSync('./archived').filter(file => nameExt(file)[1] === 'zip')
+      if (lastVoiceZipFile.length)
+        fs.unlinkSync('./archived/' + lastVoiceZipFile);
+
+
       
       // Called to create Voice Directories if not exist
       function creatVoiceDirectories (commands) {
@@ -47,7 +53,6 @@ process.on('message', async (message) => {
       addr = './voices'
       // *Users*
       var users = fs.readdirSync(addr);
-      console.log("users", users)
       users.forEach(user => {
         // Create user directory address
         var _addr = addr + '/' + user;
@@ -68,14 +73,14 @@ process.on('message', async (message) => {
             // Create voicefile address
             var ___addr = __addr + '/' + voiceFile;
             fs.copyFileSync(___addr, dstDirectory + command + '/' + voiceFile);
-            console.log("Copied!")
           });
         });
       });
       
       // create a file to stream archive data to.
-      console.log("Creating Stream to FILE")
-      var output = fs.createWriteStream(__dirname + '/archived/voices.zip');
+      var randomHashish = Math.floor(Math.random() * 3000);
+      var newZipName = `voices-${randomHashish}.zip`;
+      var output = fs.createWriteStream(__dirname + `/archived/${newZipName}`);
       var archive = archiver('zip', {
         zlib: { level: 9 } // Sets the compression level.
       });
@@ -126,7 +131,7 @@ process.on('message', async (message) => {
         archive.finalize();
   
         fs.writeFileSync(`./archived/updateTime.txt`, Date.now());
-        process.send({status: 'ok'});
+        process.send({status: 'ok', newZipName});
       }, 0)
       
       // append files from a sub-directory, putting its contents at the root of archive
