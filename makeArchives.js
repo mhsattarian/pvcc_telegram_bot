@@ -13,16 +13,16 @@ if (!fs.existsSync('./archived/updateTime.txt')) {
 }
 
 process.on('message', async (message) => {
-  if (message.force) {
-    // Write an old time to updateTime so make it zip again
-    fs.writeFileSync(`./archived/updateTime.txt`, '1545341365468');
-  }
+  // if (message.force) {
+  //   // Write an old time to updateTime so make it zip again
+  //   fs.writeFileSync(`./archived/updateTime.txt`, '1545341365468');
+  // }
 
   // Then is the last time the zip file created. read from updateTime.txt
   then = parseInt(fs.readFileSync('./archived/updateTime.txt', { encoding: 'utf-8'}));
   var now = new Date();
   var hourseSpent = (now - then) / (1000 * 60 * 60)
-  if (hourseSpent < 6) {
+  if (hourseSpent < 2) {
     console.log("Not a lot of time spent");
     return process.send({status: 'ok'});
   }
