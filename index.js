@@ -61,18 +61,18 @@ const bot = new Telegraf(process.env.BOT_TOKEN);
 const commands = [
   'روشن',
   'خاموش',
-  'روشن شو',
   'خاموش شو',
   'ضبط کن',
   'ماشین حساب',
   'گرامافون',
   'شروع کن',
   'برخیز',
+  'دیتا',
   'دوربین',
   'سلفی',
   'ساعت',
   'قفل',
-  'دیتا',
+  'روشن شو',
   'وای‌فای',
   'تماس',
   'گالری',
@@ -116,7 +116,6 @@ const chooseCommandKeyboard = (userSession) => Markup.keyboard(commands.map(
   (item)=> `${item}${
       ((userSession.commandStatuses[item].voiceCount || 0) >= 3) ? ' ✅' : ''
     }`).sort(function(a, b){
-      console.log(a, b);
       if (a.includes('✅') && !b.includes('✅')) return +1;
       else if (! a.includes('✅') && b.includes('✅')) return -1;
       else return 0;
