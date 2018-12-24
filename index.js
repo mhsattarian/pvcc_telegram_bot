@@ -61,10 +61,10 @@ const bot = new Telegraf(process.env.BOT_TOKEN);
 const commands = [
   'روشن',
   'خاموش',
-  'خاموش شو',
+  // 'خاموش شو',
   'ضبط کن',
   'ماشین حساب',
-  'گرامافون',
+  // 'گرامافون',
   'شروع کن',
   'برخیز',
   'دیتا',
@@ -419,7 +419,7 @@ bot.use((new LocalSession({ database: 'sessions.json',  property: 'userSession'}
 bot.use(session())
 
 // Define Bot stages (scenes)
-const stage = new Stage([firstScene, secondScene], { ttl: 100 })
+const stage = new Stage([firstScene, secondScene], { ttl: 1000 })
 bot.use(stage.middleware())
 
 
