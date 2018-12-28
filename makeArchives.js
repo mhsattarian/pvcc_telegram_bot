@@ -144,13 +144,14 @@ process.on('message', async (message) => {
       // finalize the archive (ie we are done appending files but streams have to finish yet)
       // 'close', 'end' or 'finish' may be fired right after calling this method so register to them beforehand
 
-      function nameExt (fileName) {
-        var temp = fileName.split('.');
-        var name = temp.slice(0, -1).join('-');
-        var extension = temp.slice(-1)[0];
-
-        return [name, extension]
-      }
     }); 
   }
 });
+
+function nameExt (fileName) {
+  var temp = fileName.split('.');
+  var name = temp.slice(0, -1).join('-');
+  var extension = temp.slice(-1)[0];
+
+  return [name, extension]
+}
