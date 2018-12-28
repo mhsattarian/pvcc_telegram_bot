@@ -23,8 +23,9 @@ process.on('message', async (message) => {
   var now = new Date();
   var hourseSpent = (now - then) / (1000 * 60 * 60)
   if (hourseSpent < 2) {
+    lastVoiceZipFile = fs.readdirSync('./archived').filter(file => nameExt(file)[1] === 'zip')
     console.log("Not a lot of time spent");
-    return process.send({status: 'ok'});
+    return process.send({status: 'ok', newZipName: lastVoiceZipFile});
   }
   else {
     console.log("Zipping again");
