@@ -52,7 +52,7 @@ npm i
 finally, run the code using:
 
 ```shell
-node index.html
+node index.js
 ```
 
 ## Bot
